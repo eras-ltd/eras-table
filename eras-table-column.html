@@ -1,0 +1,63 @@
+<link rel='import' href='../polymer/polymer.html'>
+<!--
+`eras-table-column`
+@demo demo/index.html
+-->
+<dom-module id='eras-table-column'>
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'eras-table-column',
+      properties: {
+        /** Text to be used as the column header. */ 
+        label: String,
+
+        /** Name of the property to be displayed in this column. */
+        property: String,
+
+        /** A function that will be used to format the data for display. */
+        format: {
+         type:Function,
+         value: function(s) { return s; } 
+        },
+
+        /** Boolean specifying whether the data can be sorted by this column. */
+        canSort: {
+          type: Boolean,
+          value: false
+        },
+
+        /** Boolean specifying whether the data is currently sorted by this column. */
+        sorted: {
+          type: Boolean,
+          value: false
+        },
+
+        /** String specifying which direction the data is sorted in (asc/desc). */
+        direction: {
+          type: String,
+          value: "asc"
+        },
+
+        /** Boolean specifying whether the data can be filtered by this column. */
+        canFilter: {
+          type: Boolean,
+          value: false
+        },
+
+        /** Boolean specifying whether the data is currently filtered by this column. */
+        filtered: {
+          type: Boolean,
+          value: false
+        },
+      }
+    });
+  </script>
+</dom-module>
