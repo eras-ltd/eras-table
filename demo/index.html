@@ -1,59 +1,56 @@
 <!doctype html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
 
-  <title>eras-table demo</title>
+	<title>eras-table demo</title>
 
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+	<script src='../../webcomponentsjs/webcomponents-lite.js'></script>
 
-  <link rel='import' href='../../paper-styles/color.html'>
-  <link rel='import' href='../../paper-styles/typography.html'>
-  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-  <link rel="import" href="../eras-table-display.html">
+	<link rel='import' href='../../paper-styles/color.html'>
+	<link rel='import' href='../../paper-styles/typography.html'>
+	<link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
+	<link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+	<link rel='import' href='../eras-table-display.html'>
 
-  <style is="custom-style" include="demo-pages-shared-styles">
-     :root {
-      --default-subtitle-colour: var(--paper-grey-700);
-    }
-  </style>
+	<style is='custom-style' include='demo-pages-shared-styles'>
+		:root {
+			--default-subtitle-colour: var(--paper-grey-700);
+		}
+	</style>
 </head>
 
 <body>
-  <div class="vertical-section-container centered" style="">
-    <h3>Basic eras-table demo</h3>
-    <demo-snippet>
-      <template is='dom-bind' id='app'>
-        <eras-table-display data='{{data}}' page='{{page}}'>
-          <eras-table-column label='col-1' property='prop-1' format='{{format}}'></eras-table-column>
-          <eras-table-column label='col-2' property='prop-2' format='{{format}}'></eras-table-column>
-          <eras-table-column label='col-3' property='prop-3' format='{{format}}'></eras-table-column>
-        </eras-table-display>
-      </template>
-      <script>
-        var app = document.querySelector('#app');
-        app.columns = [];
-        app.data = [];
+	<div class='vertical-section-container centered'>
+		<h3>Basic eras-table demo</h3>
+		<demo-snippet>
+			<template is='dom-bind' id='app'>
+				<eras-table-display data='{{data}}' page='{{page}}'>
+					<eras-table-column label='Column 1' property='prop-1' format='{{format1}}'></eras-table-column>
+					<eras-table-column label='Column 2' property='prop-2'></eras-table-column>
+					<eras-table-column label='Column 3' property='prop-3' format='{{format2}}'></eras-table-column>
+				</eras-table-display>
+			</template>
+			<script>
+				var app = document.querySelector('#app');
+				app.data = [];
 
-        for (var j = 0; j < 3; j++) {
-          app.data[j] = {};
-          for (var k = 0; k < app.columns.length; k++) {
-            var col = app.columns[k];
-            app.data[j][col.property] = "data-" + j + "-" + col.property;
-          }
-        }
+				for (var row = 0; row < 3; row++) {
+					app.data[row] = {};
+					for (var col = 1; col <= 3; col++) {
+						app.data[row]['prop-' + col] = 'data-' + row + '-prop-' + col;
+					}
+				}
 
-        app.page = { current: 1, size: 3, results: 10 };
+				app.page = { current: 1, size: 3, results: 10 };
 
-        app.format = function(s) {
-          return s + "!";
-        }
-      </script>
-    </demo-snippet>
-  </div>
+				app.format1 = function (d) { return d + '!'; };
+				app.format2 = function (d) { return d + '?'; };
+			</script>
+		</demo-snippet>
+	</div>
 </body>
 
 </html>

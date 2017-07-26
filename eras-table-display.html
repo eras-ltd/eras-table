@@ -6,273 +6,263 @@
 <link rel='import' href='../paper-progress/paper-progress.html'>
 <!--
 `eras-table-display`
+
+
 @demo demo/index.html
 -->
+
 <dom-module id='eras-table-display'>
-    <template>
-        <style include="iron-flex iron-flex-alignment">
-             :host {
-                display: block;
-            }
+	<template>
+		<style include='iron-flex iron-flex-alignment'>
+			:host {
+				display: block;
+			}
 
-            #main-toolbar,
-            #footer {
-                height: 64px;
-                padding: 0px 6px 0px 24px;
-            }
+			#main-toolbar,
+			#footer {
+				height: 64px;
+				padding: 0px 6px 0px 24px;
+			}
 
-            th,
-            td {
-                padding: 6px 28px 6px 28px;
-                text-align: left;
-            }
+			table {
+				border-collapse: collapse;
+			}
 
-            td {
-                border-bottom: 1px solid #dbdbdb;
-                font-size: 13px;
-            }
+			th,
+			td {
+				padding: 6px 28px 6px 28px;
+				text-align: left;
+			}
 
-            th,
-            #footer {
-                font-size: 12px;
-                font-weight: normal;
-                color: var(--custom-subtitle-colour, --default-subtitle-colour);
-            }
+			td {
+				border-bottom: 1px solid #dbdbdb;
+				font-size: 13px;
+			}
 
-            #footer {
-                height: 56px;
-            }
+			th,
+			#footer {
+				font-size: 12px;
+				font-weight: normal;
+				color: var(--custom-subtitle-colour, --default-subtitle-colour);
+			}
 
-            table[loading] td {
-                color: var(--paper-grey-500);
-            }
+			#footer {
+				height: 56px;
+			}
 
-            table:not([loading]) paper-progress {
-                display: none;
-            }
+			table[loading] td {
+				color: var(--paper-grey-500);
+			}
 
-            #loading-cell {
-                height: 4px;
-                padding: 0;
-            }
+			table:not([loading]) paper-progress {
+				display: none;
+			}
 
-            paper-progress {
-                width: 100%;
-            }
-        </style>
-        <paper-material elevation="1">
-            <div>
-                <table loading$='{{loading}}'>
-                    <thead id="head">
-                        <tr>
-                             <template is='dom-repeat' items='{{columns}}' as='column'>
-                                <th>{{column.label}}</th>
-                            </template> 
-                        </tr>
-                    </thead>
-                    <tbody id="body">
-                        <tr id="loading-row">
-                            <td id="loading-cell" colspan$="{{columns.length}}">
-                                <paper-progress indeterminate></paper-progress>
-                            </td>
-                        </tr>
-                          <template is='dom-repeat' items='{{data}}' as='row'>
-                            <tr>
-                                <template is='dom-repeat' items='{{columns}}' as='column'>
-                                    <td>
-                                        {{getData(column, row)}}
-                                    </td>
-                                </template>
-                            </tr>
-                        </template>  
-                    </tbody>
-                </table>
-            </div>
-             <div id='footer' class="layout horizontal center">
-                <div class="flex"></div>
-                <div>{{_pagingInfo.from}}-{{_pagingInfo.to}} of {{page.results}}</div>
-                <template is='dom-repeat' items='{{_pagingButtons}}' as='button'>
-                    <paper-icon-button id="{{button.id}}" icon="{{button.icon}}" on-tap="_goToPage" data-target-page="{{button.target}}" disabled$="{{!button.enabled}}"></paper-icon-button>
-                </template>
-            </div> 
-        </paper-material>
+			#loading-cell {
+				height: 4px;
+				padding: 0;
+			}
 
-    </template>
-    <script>
-        Polymer({
-            is: 'eras-table-display',
-            properties: {
+			paper-progress {
+				width: 100%;
+			}
+		</style>
+		<slot name=''></slot>
+		<paper-material elevation='1'>
+			<div>
+				<table loading$='{{loading}}'>
+					<thead id='head'>
+						<tr>
+							<template is='dom-repeat' items='{{columns}}' as='column'>
+								<th class="label">{{column.label}}</th>
+							</template>
+						</tr>
+					</thead>
+					<tbody id='body'>
+						<tr id='loading-row'>
+							<td id='loading-cell' colspan$='{{columns.length}}'>
+								<paper-progress indeterminate></paper-progress>
+							</td>
+						</tr>
+						<template is='dom-repeat' items='{{data}}' as='row'>
+							<tr class='data'>
+								<template is='dom-repeat' items='{{columns}}' as='column'>
+									<td>
+										{{getData(column, row)}}
+									</td>
+								</template>
+							</tr>
+						</template>
+					</tbody>
+				</table>
+			</div>
+			<div id='footer' class='layout horizontal center'>
+				<div class='flex'></div>
+				<div>{{_pagingInfo.from}}-{{_pagingInfo.to}} of {{page.results}}</div>
+				<template is='dom-repeat' items='{{_pagingButtons}}' as='button'>
+					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
+				</template>
+			</div>
+		</paper-material>
+	</template>
 
-                /**
-                 * Array of objects describing the columns to be used for the table.
-                 * It should be filled during initialisation using info from supplied
-                 * `eras-table-column` elements
-                 * @type {{ label:String, property:String, format:Function }[]}
-                 */
-                columns: {
-                    type: Array,
-                    value: []
-                },
+	<script>
+		Polymer({
+			is: 'eras-table-display',
+			properties: {
+				/**
+					* Array of `eras-table-column` elements describing the columns to be used for the table.
+					* It should be filled during initialisation with `eras-table-column`s found in the 'columns' slot
+					* @type {eras-table-column[]} 
+					*/
+				columns: {
+					type: Array,
+					value: []
+				},
 
-                /**
-                 * Array of objects containing the current page of data to display in the table.
-                 * Each object in the array represents a row in the table where the name of the properties
-                 * are matched by the value of the `property` properties of the `columns` objects, and the
-                 * values are the data to be displayed.
-                 * @type {Object[]}
-                 */
-                data: {
-                    type: Array,
-                    value: []
-                },
+				/**
+					* Array of objects containing the current page of data to display in the table.
+					* Each object in the array represents a row in the table where the name of the properties
+					* are matched by the value of the `property` properties of the `columns` objects, and the
+					* values are the data to be displayed.
+					* @type {Object[]}
+					*/
+				data: {
+					type: Array,
+					value: []
+				},
 
-                /**
-                 * Specifies whether to display the loading UI (show the loading bar and grey out table contents).
-                 * @type {Boolean}
-                 */
-                loading: {
-                    type: Boolean,
-                    value: true
-                },
+				/**
+				 * Specifies whether to display the loading UI (show the loading bar and grey out table contents).
+				 * @type {Boolean}
+				 */
+				loading: {
+					type: Boolean,
+					value: false
+				},
 
-                /**
-                 * Object containing data needed for pagination UI.
-                 * - `current`: The current page number
-                 * - `size`: The number of results to display per page
-                 * - `results`: The total number of results
-                 * @type {{ current:Number, size:Number, results:Number }}
-                 */
-                page: {
-                    type: Object,
-                    value: { current: 1, size: 10, results: 0 }
-                },
+				/**
+				 * Object containing data needed for pagination UI.
+				 * - `current`: The current page number
+				 * - `size`: The number of results to display per page
+				 * - `results`: The total number of results
+				 * @type {{ current:Number, size:Number, results:Number }}
+				 */
+				page: {
+					type: Object,
+					value: { current: 1, size: 10, results: 0 }
+				},
 
-                /**
-                 * Object containing information for pagination UI display. 
-                 * Is computed using the `page` property
-                 * @type {{ from:Number, to:Number }}
-                 */
-                _pagingInfo: {
-                    type: Object,
-                    value: { from: 0, to: 0 },
-                    computed: '_computePagingInfo(page)'
-                },
+				/**
+				 * Object containing information for pagination UI display. 
+				 * Is computed using the `page` property
+				 * @type {{ from:Number, to:Number }}
+				 */
+				_pagingInfo: {
+					type: Object,
+					value: { from: 0, to: 0 },
+					computed: '_computePagingInfo(page)'
+				},
 
-                /**
-                 * Objects defining the properties of the pagination buttons.
-                 * Each property should be a { id:String, icon:String, target:Number, enabled: Boolean }
-                 * @type {{ Array }}
-                 */
-                _pagingButtons: {
-                    type: Array,
-                    computed: '_computePagingButtons(page)'
-                }
-            },
+				/**
+				 * Objects defining the properties of the pagination buttons.
+				 * Each property should be a { id:String, icon:String, target:Number, enabled: Boolean }
+				 * @type {{ Array }}
+				 */
+				_pagingButtons: {
+					type: Array,
+					computed: '_computePagingButtons(page)'
+				}
+			},
+			ready: function () {
+				this._observer = Polymer.dom(this).observeNodes(function (i) {
+					this.columns = i.addedNodes.filter(function (n) { return n.tagName === 'ERAS-TABLE-COLUMN'; });
+				});
+			},
 
-            ready: function () {
-                this._observer = Polymer.dom(this).observeNodes(function (i) {
-                    this.columnCount = i.addedNodes.length;
-                    this.columns =
-                        i.addedNodes
-                            .filter(function (n) { return n.tagName === "ERAS-TABLE-COLUMN"; })
-                            .map(function (n) {
-                                return {
-                                    label: n.label,
-                                    property: n.property,
-                                    format: n.format,
-                                    canSort: n.canSort,
-                                    sorted: n.sorted,
-                                    direction: n.direction,
-                                    canFilter: n.canFilter,
-                                    filtered: n.filtered
-                                };
-                            });
-                });
-            },
+			/**
+				* Gets the data for a given column from the supplied row and formats it for display.
+				* 
+				* @param {Object} column Object from the `columns` property that represents the column to get the data for
+				* @param {Object} row Object from the `data` property that contains the data to be displayed
+				* @return {String} The data from the given row/column formatted using the `format` Function of the column
+				*/
+			getData: function (column, row) {
+				return column.formatData(row[column.property]);
+			},
 
-            /**
-             * Gets the data for a given column from the supplied row and formats it for display.
-             * 
-             * @param {Object} column Object from the `columns` property that represents the column to get the data for
-             * @param {Object} row Object from the `data` property that contains the data to be displayed
-             * @return {String} The data from the given row/column formatted using the `format` Function of the column
-             */
-            getData: function (column, row) {
-                return column.format(row[column.property]);
-            },
+			/**
+			 * Computes the object containing information for pagination UI display.
+			 *
+			 * @param {Object} page Object from the `page` property
+			 * @return {{ from:Number, to:Number }}
+			 */
+			_computePagingInfo: function (page) {
+				var from = (this.page.current - 1) * this.page.size + 1;
+				var to = Math.min(from + this.page.size - 1, page.results);
 
-            /**
-             * Computes the object containing information for pagination UI display.
-             *
-             * @param {Object} page Object from the `page` property
-             * @return {{ from:Number, to:Number }}
-             */
-            _computePagingInfo: function (page) {
-                var from = (this.page.current - 1) * this.page.size + 1;
-                var to = Math.min(from + this.page.size - 1, page.results);
+				return {
+					from: from,
+					to: to
+				};
+			},
 
-                return {
-                    from: from,
-                    to: to
-                };
-            },
+			/**
+			 * Computes the array of objects that are iterated over to produce the pagination buttons.
+			 *
+			 * @param {Object} page Object from the `page` property
+			 * @return {{ id:String, icon: String, target:Number, enabled:Boolean }[]}
+			 */
+			_computePagingButtons: function (page) {
+				var last = Math.ceil(page.results / page.size);
+				var arr = [];
 
-            /**
-             * Computes the array of objects that are iterated over to produce the pagination buttons.
-             *
-             * @param {Object} page Object from the `page` property
-             * @return {{ id:String, icon: String, target:Number, enabled:Boolean }[]}
-             */
-            _computePagingButtons: function (page) {
-                var last = Math.ceil(page.results / page.size);
-                var arr = [];
+				arr[0] = {
+					id: 'first',
+					icon: 'first-page',
+					target: 1,
+					enabled: page.current > 1
+				};
 
-                arr[0] = {
-                    id: 'first',
-                    icon: 'first-page',
-                    target: 1,
-                    enabled: page.current > 1
-                };
+				arr[1] = {
+					id: 'previous',
+					icon: 'chevron-left',
+					target: Math.max(page.current - 1, 1),
+					enabled: page.current > 1
+				};
 
-                arr[1] = {
-                    id: 'previous',
-                    icon: 'chevron-left',
-                    target: Math.max(page.current - 1, 1),
-                    enabled: page.current > 1
-                };
+				arr[2] = {
+					id: 'next',
+					icon: 'chevron-right',
+					target: Math.min(page.current + 1, last),
+					enabled: page.current < last
+				};
 
-                arr[2] = {
-                    id: 'next',
-                    icon: 'chevron-right',
-                    target: Math.min(page.current + 1, last),
-                    enabled: page.current < last
-                };
+				arr[3] = {
+					id: 'last',
+					icon: 'last-page',
+					target: last,
+					enabled: page.current < last
+				};
 
-                arr[3] = {
-                    id: 'last',
-                    icon: 'last-page',
-                    target: last,
-                    enabled: page.current < last
-                };
+				return arr;
+			},
 
-                return arr;
-            },
+			/**
+			 * Function for the pagination buttons to call 'on-tap'. 
+			 * checks if the button is disabled (because even when disabled the
+			 * `tap` event can be triggered by calling `.click()`) then fires
+			 * a `change-page` event providing the target page pulled from the
+			 * button that was clicked.
+			 *
+			 * @return {{ target:Number }}
+			 */
+			_goToPage: function (e) {
+				var button = Polymer.dom(e).localTarget;
 
-            /**
-             * Function for the pagination buttons to call 'on-tap'. 
-             * checks if the button is disabled (because even when disabled the
-             * `tap` event can be triggered by calling `.click()`) then fires
-             * a `change-page` event providing the target page pulled from the
-             * button that was clicked.
-             *
-             * @return {{ target:Number }}
-             */
-            _goToPage: function (e) {
-                var button = Polymer.dom(e).localTarget;
-
-                if (!button.disabled)
-                    this.fire('change-page', { target: button.dataTargetPage });
-            }
-        });
-    </script>
+				if (!button.disabled)
+					this.fire('change-page', { target: button.dataTargetPage });
+			}
+		});
+	</script>
 </dom-module>
