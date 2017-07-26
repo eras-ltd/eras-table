@@ -51,7 +51,7 @@
 
 				test('columns', function (done) {
 					flush(function () {
-						var cols = el.$.head.querySelectorAll('th.label');
+						var cols = el.$.head.querySelectorAll('div.cell.head.label');
 						assert.equal(el.columns.length, 3, 'table.columns should have 3 objects but has ' + el.columns.length);
 						assert.equal(cols.length, 3, 'the table should have 3 column labels (th.label) but has ' + cols.length);
 						done();
@@ -60,7 +60,7 @@
 
 				test('rows', function (done) {
 					flush(function () {
-						var rows = el.$.body.querySelectorAll('tr.data');
+						var rows = el.$.body.querySelectorAll('div.row.data');
 						assert.equal(el.data.length, 3, 'table.data should have 3 objects but has ' + el.data.length);
 						assert.equal(rows.length, 3, 'the table should have 3 data rows (tr.data) but has ' + rows.length);
 						done();

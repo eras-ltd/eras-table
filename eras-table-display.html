@@ -28,18 +28,17 @@
 				border-collapse: collapse;
 			}
 
-			th,
-			td {
+			div.cell {
 				padding: 6px 28px 6px 28px;
 				text-align: left;
 			}
 
-			td {
+			div.cell {
 				border-bottom: 1px solid #dbdbdb;
 				font-size: 13px;
 			}
 
-			th,
+			div.cell.head,
 			#footer {
 				font-size: 12px;
 				font-weight: normal;
@@ -50,51 +49,88 @@
 				height: 56px;
 			}
 
-			table[loading] td {
+			div.table[loading] div.cell:not(.head) {
 				color: var(--paper-grey-500);
 			}
 
-			table:not([loading]) paper-progress {
+			div.table:not([loading]) #loading paper-progress {
 				display: none;
 			}
 
-			#loading-cell {
+			div.caption#loading {
 				height: 4px;
 				padding: 0;
+				position: relative;
+				top: 29px;
 			}
 
 			paper-progress {
 				width: 100%;
 			}
+			/* styles for pseudo tables */
+
+			div.table {
+				display: table;
+			}
+
+			div.table div.caption {
+				display: table-caption;
+			}
+
+			div.table div.columns {
+				display: table-column-group;
+			}
+
+			div.table div.column {
+				display: table-column;
+			}
+
+			div.table div.header {
+				display: table-header-group;
+			}
+
+			div.table div.body {
+				display: table-row-group;
+			}
+
+			div.table div.footer {
+				display: table-footer-group;
+			}
+
+			div.table div.row {
+				display: table-row;
+			}
+
+			div.table div.row div.cell {
+				display: table-cell;
+			}
+
+			div.table div.row div.cell.head {
+				font-weight: bold;
+			}
 		</style>
 		<slot name=''></slot>
 		<paper-material elevation='1'>
-			<div>
-				<table loading$='{{loading}}'>
-					<thead id='head'>
-						<tr>
-							<template is='dom-repeat' items='{{columns}}' as='column'>
-								<th class="label">{{column.label}}</th>
-							</template>
-						</tr>
-					</thead>
-					<tbody id='body'>
-						<tr id='loading-row'>
-							<td id='loading-cell' colspan$='{{columns.length}}'>
-								<paper-progress indeterminate></paper-progress>
-							</td>
-						</tr>
-						<template is='dom-repeat' items='{{data}}' as='row'>
-							<tr class='data'>
-								<template is='dom-repeat' items='{{columns}}' as='column'>
-									<td>
-										{{getData(column, row)}}
-									</td>
-								</template>
-							</tr>
+			<div class='table' loading$='{{loading}}'>
+				<div id='loading' class='caption'>
+					<paper-progress indeterminate></paper-progress>
+				</div>
+				<div id='head' class='header'>
+					<div class='row'>
+						<template is='dom-repeat' items='{{columns}}' as='column'>
+							<div class='cell head label'>{{column.label}}</div>
 						</template>
-					</tbody>
-				</table>
+					</div>
+				</div>
+				<div id='body' class='body'>
+					<template is='dom-repeat' items='{{data}}' as='row'>
+						<div class='row data'>
+							<template is='dom-repeat' items='{{columns}}' as='column'>
+								<div class='cell'>{{getData(column, row)}}</div>
+							</template>
+						</div>
+					</template>
+				</div>
 			</div>
 			<div id='footer' class='layout horizontal center'>
 				<div class='flex'></div>
@@ -138,7 +174,8 @@
 				 */
 				loading: {
 					type: Boolean,
-					value: false
+					value: false,
+					observer: '_loadingChanged'
 				},
 
 				/**
@@ -174,6 +211,7 @@
 					computed: '_computePagingButtons(page)'
 				}
 			},
+
 			ready: function () {
 				this._observer = Polymer.dom(this).observeNodes(function (i) {
 					this.columns = i.addedNodes.filter(function (n) { return n.tagName === 'ERAS-TABLE-COLUMN'; });
@@ -262,6 +300,20 @@
 
 				if (!button.disabled)
 					this.fire('change-page', { target: button.dataTargetPage });
+			},
+
+			/**
+			 * When the `loading` property is changed this function updates the
+			 * position of the loading indicator. `top: 29px` is set in style but
+			 * if a label wraps it may be more than this
+			 */
+			_loadingChanged: function (newValue, oldValue) {
+				if (oldValue === undefined)
+					return;
+
+				var loading = this.$.loading;
+				var heading = this.$.head;
+				loading.style.top = (loading.offsetHeight + heading.offsetHeight - 1) + "px";
 			}
 		});
 	</script>
