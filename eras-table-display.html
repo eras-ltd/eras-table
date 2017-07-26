@@ -1,5 +1,6 @@
 <link rel='import' href='../polymer/polymer.html'>
 <link rel='import' href='../eras-table/eras-table-column.html'>
+<link rel='import' href='../eras-table/eras-table-classes.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
 <link rel='import' href='../paper-icon-button/paper-icon-button.html'>
 <link rel='import' href='../paper-material/paper-material.html'>
@@ -10,10 +11,9 @@
 
 @demo demo/index.html
 -->
-
 <dom-module id='eras-table-display'>
 	<template>
-		<style include='iron-flex iron-flex-alignment'>
+		<style include='iron-flex iron-flex-alignment eras-table-classes'>
 			:host {
 				display: block;
 			}
@@ -66,47 +66,6 @@
 
 			paper-progress {
 				width: 100%;
-			}
-			/* styles for pseudo tables */
-
-			div.table {
-				display: table;
-			}
-
-			div.table div.caption {
-				display: table-caption;
-			}
-
-			div.table div.columns {
-				display: table-column-group;
-			}
-
-			div.table div.column {
-				display: table-column;
-			}
-
-			div.table div.header {
-				display: table-header-group;
-			}
-
-			div.table div.body {
-				display: table-row-group;
-			}
-
-			div.table div.footer {
-				display: table-footer-group;
-			}
-
-			div.table div.row {
-				display: table-row;
-			}
-
-			div.table div.row div.cell {
-				display: table-cell;
-			}
-
-			div.table div.row div.cell.head {
-				font-weight: bold;
 			}
 		</style>
 		<slot name=''></slot>
