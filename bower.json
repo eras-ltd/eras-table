@@ -6,7 +6,10 @@
     "iron-flex-layout": "1",
     "paper-material": "1",
     "paper-progress": "1",
-    "paper-icon-button": "1"
+    "paper-icon-button": "1",
+    "paper-dropdown-menu": "1",
+    "paper-menu": "1",
+    "paper-item": "1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

@@ -37,14 +37,14 @@
 				var app = document.querySelector('#app');
 				app.data = [];
 
-				for (var row = 0; row < 3; row++) {
+				for (var row = 0; row < 5; row++) {
 					app.data[row] = {};
 					for (var col = 1; col <= 3; col++) {
-						app.data[row]['prop-' + col] = 'data-' + row + '-prop-' + col;
+						app.data[row]['prop-' + col] = 'd' + row + 'p' + col;
 					}
 				}
 
-				app.page = { current: 1, size: 3, results: 10 };
+				app.page = { current: 1, size: 5, results: 15 };
 
 				app.format1 = function (d) { return d + '!'; };
 				app.format2 = function (d) { return d + '?'; };

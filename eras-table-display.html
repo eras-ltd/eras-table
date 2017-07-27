@@ -2,12 +2,22 @@
 <link rel='import' href='../eras-table/eras-table-column.html'>
 <link rel='import' href='../eras-table/eras-table-classes.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
+<link rel='import' href='../paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../paper-item/paper-item.html'>
+<link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-icon-button/paper-icon-button.html'>
 <link rel='import' href='../paper-material/paper-material.html'>
 <link rel='import' href='../paper-progress/paper-progress.html'>
 <!--
-`eras-table-display`
+`eras-table-display` 
 
+### Styling
+
+Property|Description|Default
+--------|-----------|-------
+`--header-colour`|Colour of the text in the header|`--paper-grey-700`
+`--footer-colour`|Colour of the text in the footer|`--paper-grey-700`
+`--border-colour`|Colour of the border between rows|`--paper-grey-400`
 
 @demo demo/index.html
 -->
@@ -24,8 +34,9 @@
 				padding: 0px 6px 0px 24px;
 			}
 
-			table {
+			div.table {
 				border-collapse: collapse;
+				width: 100%;
 			}
 
 			div.cell {
@@ -34,7 +45,7 @@
 			}
 
 			div.cell {
-				border-bottom: 1px solid #dbdbdb;
+				border-bottom: 1px solid var(--border-colour, --paper-grey-400);
 				font-size: 13px;
 			}
 
@@ -42,11 +53,15 @@
 			#footer {
 				font-size: 12px;
 				font-weight: normal;
-				color: var(--custom-subtitle-colour, --default-subtitle-colour);
+			}
+
+			div.cell.head {
+				color: var(--header-colour, --paper-grey-700);
 			}
 
 			#footer {
 				height: 56px;
+				color: var(--footer-colour, --paper-grey-700);
 			}
 
 			div.table[loading] div.cell:not(.head) {
@@ -66,6 +81,23 @@
 
 			paper-progress {
 				width: 100%;
+			}
+
+			#perPageMenu {
+				margin-right: 20px;
+				width: 50px;
+				cursor: pointer;
+				color: var(--custom-subtitle-colour, --default-subtitle-colour);
+				--paper-input-container-underline: {
+					display: none;
+				}
+				--paper-input-container-underline-focus: {
+					display: none;
+				}
+				--paper-input-container-input: {
+					text-align: right;
+					font-size: 12px;
+				}
 			}
 		</style>
 		<slot name=''></slot>
@@ -93,6 +125,16 @@
 			</div>
 			<div id='footer' class='layout horizontal center'>
 				<div class='flex'></div>
+				<div>Rows:</div>
+				<div>
+					<paper-dropdown-menu id='perPageMenu' no-label-float on-iron-select='_changePerPage' vertical-align='bottom'>
+						<paper-menu class='dropdown-content' selected='{{page.size}}' attr-for-selected='value'>
+							<template is='dom-repeat' items='{{_pageSizeOptions}}' as='option'>
+								<paper-item value='{{option}}'>{{option}}</paper-item>
+							</template>
+						</paper-menu>
+					</paper-dropdown-menu>
+				</div>
 				<div>{{_pagingInfo.from}}-{{_pagingInfo.to}} of {{page.results}}</div>
 				<template is='dom-repeat' items='{{_pagingButtons}}' as='button'>
 					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
@@ -163,12 +205,21 @@
 				/**
 				 * Objects defining the properties of the pagination buttons.
 				 * Each property should be a { id:String, icon:String, target:Number, enabled: Boolean }
-				 * @type {{ Array }}
+				 * @type {{ id:String, icon:String, target:Number, enabled: Boolean }[]}
 				 */
 				_pagingButtons: {
 					type: Array,
 					computed: '_computePagingButtons(page)'
-				}
+				},
+
+				/**
+				 * An array of available page size options
+				 * @type {Number[]}
+				 */
+				_pageSizeOptions: {
+					type: Array,
+					computed: '_computePageSizeOptions(page)'
+				},
 			},
 
 			ready: function () {
@@ -246,6 +297,16 @@
 			},
 
 			/**
+			 * Computes the options for page size that will be shown on the dropdown
+			 */
+			_computePageSizeOptions: function (page) {
+				return [5, 10, 25, 50, 100, page.results]
+					.filter(function (value, index, self) {
+						return value <= page.results && self.indexOf(value) === index;
+					});
+			},
+
+			/**
 			 * Function for the pagination buttons to call 'on-tap'. 
 			 * checks if the button is disabled (because even when disabled the
 			 * `tap` event can be triggered by calling `.click()`) then fires
@@ -261,6 +322,11 @@
 					this.fire('change-page', { target: button.dataTargetPage });
 			},
 
+			_changePerPage: function(e) {
+				var menu = Polymer.dom(e).localTarget;
+				console.info('per page changed', menu);
+			},
+
 			/**
 			 * When the `loading` property is changed this function updates the
 			 * position of the loading indicator. `top: 29px` is set in style but
@@ -272,7 +338,7 @@
 
 				var loading = this.$.loading;
 				var heading = this.$.head;
-				loading.style.top = (loading.offsetHeight + heading.offsetHeight - 1) + "px";
+				loading.style.top = (loading.offsetHeight + heading.offsetHeight - 1) + 'px';
 			}
 		});
 	</script>

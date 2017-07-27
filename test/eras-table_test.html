@@ -79,241 +79,68 @@
 
 				suite('paging buttons', function () {
 					var lastPage;
+					var params = [];
+
+					params[0] = { page: 1, buttons: [] };
+					params[0].buttons[0] = { id: 'first', index: 0, target: 1, enabled: false };
+					params[0].buttons[1] = { id: 'previous', index: 1, target: 1, enabled: false };
+					params[0].buttons[2] = { id: 'next', index: 2, target: 2, enabled: true };
+					params[0].buttons[3] = { id: 'last', index: 3, target: 3, enabled: true };
+
+					params[1] = { page: 2, buttons: [] };
+					params[1].buttons[0] = { id: 'first', index: 0, target: 1, enabled: true };
+					params[1].buttons[1] = { id: 'previous', index: 1, target: 1, enabled: true };
+					params[1].buttons[2] = { id: 'next', index: 2, target: 3, enabled: true };
+					params[1].buttons[3] = { id: 'last', index: 3, target: 3, enabled: true };
+
+					params[2] = { page: 3, buttons: [] };
+					params[2].buttons[0] = { id: 'first', index: 0, target: 1, enabled: true };
+					params[2].buttons[1] = { id: 'previous', index: 1, target: 2, enabled: true };
+					params[2].buttons[2] = { id: 'next', index: 2, target: 3, enabled: false };
+					params[2].buttons[3] = { id: 'last', index: 3, target: 3, enabled: false };
 
 					setup(function () {
 						lastPage = Math.ceil(el.page.results / el.page.size);
 					});
 
 					suite('underlying object', function () {
-						suite('page 1', function () {
-							setup(function () {
-								el.page = { current: 1, size: el.page.size, results: el.page.results };
-							});
+						for (var p = 0; p < params.length; p++) {
+							var param = params[p];
 
-							test('first', function (done) {
-								var button = el._pagingButtons[0];
-								assert.equal(button.target, 1, 'on page ' + el.page.current + ' first.target should be 1');
-								assert.equal(button.enabled, false, 'on page ' + el.page.current + ' first.enabled should be false');
-								done();
-							});
+							for (var b = 0; b < param.buttons.length; b++) {
+								var button = param.buttons[b];
 
-							test('previous', function (done) {
-								var button = el._pagingButtons[1];
-								assert.equal(button.target, 1, 'on page ' + el.page.current + ' previous.target should be 1');
-								assert.equal(button.enabled, false, 'on page ' + el.page.current + ' previous.enabled should be false');
-								done();
-							});
-
-							test('next', function (done) {
-								var button = el._pagingButtons[2];
-								assert.equal(button.target, 2, 'on page ' + el.page.current + ' next.target should be 2');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' next.enabled should be true');
-								done();
-							});
-
-							test('last', function (done) {
-								var button = el._pagingButtons[3];
-								assert.equal(button.target, lastPage, 'on page ' + el.page.current + ' next.target should be ' + lastPage);
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' next.enabled should be true');
-								done();
-							});
-						});
-
-						suite('page 2', function () {
-							setup(function () {
-								el.page = { current: 2, size: el.page.size, results: el.page.results };
-							});
-
-							test('first', function (done) {
-								var button = el._pagingButtons[0];
-								assert.equal(button.target, 1, 'on page ' + el.page.current + ' first.target should be 1');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' first.enabled should be true');
-								done();
-							});
-
-							test('previous', function (done) {
-								var button = el._pagingButtons[1];
-								assert.equal(button.target, 1, 'on page ' + el.page.current + ' previous.target should be 1');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' previous.enabled should be true');
-								done();
-							});
-
-							test('next', function (done) {
-								var button = el._pagingButtons[2];
-								assert.equal(button.target, 3, 'on page ' + el.page.current + ' next.target should be 3');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' next.enabled should be true');
-								done();
-							});
-
-							test('last', function (done) {
-								var button = el._pagingButtons[3];
-								assert.equal(button.target, lastPage, 'on page ' + el.page.current + ' next.target should be ' + lastPage);
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' next.enabled should be true');
-								done();
-							});
-						});
-
-						suite('page 3', function () {
-							setup(function () {
-								el.page = { current: 3, size: el.page.size, results: el.page.results };
-							});
-
-							test('first', function (done) {
-								var button = el._pagingButtons[0];
-								assert.equal(button.target, 1, 'on page ' + el.page.current + ' first.target should be 1');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' first.enabled should be true');
-								done();
-							});
-
-							test('previous', function (done) {
-								var button = el._pagingButtons[1];
-								assert.equal(button.target, 2, 'on page ' + el.page.current + ' previous.target should be 2');
-								assert.equal(button.enabled, true, 'on page ' + el.page.current + ' previous.enabled should be true');
-								done();
-							});
-
-							test('next', function (done) {
-								var button = el._pagingButtons[2];
-								assert.equal(button.target, 3, 'on page ' + el.page.current + ' next.target should be 3');
-								assert.equal(button.enabled, false, 'on page ' + el.page.current + ' next.enabled should be false');
-								done();
-							});
-
-							test('last', function (done) {
-								var button = el._pagingButtons[3];
-								assert.equal(button.target, lastPage, 'on page ' + el.page.current + ' next.target should be ' + lastPage);
-								assert.equal(button.enabled, false, 'on page ' + el.page.current + ' next.enabled should be false');
-								done();
-							});
-						});
+								test('page ' + param.page + ': ' + button.id, function (done) {
+									el.page = { current: param.page, size: el.page.size, results: el.page.results };
+									flush(function () {
+										var buttonElement = el._pagingButtons[button.index];
+										assert.equal(buttonElement.target, button.target, 'on page ' + param.page + ' ' + button.id + '.target should be ' + button.target);
+										assert.equal(buttonElement.enabled, button.enabled, 'on page ' + param.page + ' ' + button.id + '.enabled should be ' + button.enabled);
+										done();
+									});
+								});
+							}
+						}
 					});
 
 					suite('repeated elements', function () {
-						suite('page 1', function () {
-							setup(function () {
-								el.page = { current: 1, size: el.page.size, results: el.page.results };
-							});
+						for (var p = 0; p < params.length; p++) {
+							var param = params[p];
 
-							test('first', function (done) {
-								flush(function () {
-									var button = el.$$('#first');
-									assert.equal(button.dataTargetPage, 1, 'on page ' + el.page.current + ' first.dataTargetPage should be 1');
-									assert.equal(button.disabled, true, 'on page ' + el.page.current + ' first.disabled should be true');
-									done();
+							for (var b = 0; b < param.buttons.length; b++) {
+								var button = param.buttons[b];
+
+								test('page ' + param.page + ': ' + button.id, function (done) {
+									el.page = { current: param.page, size: el.page.size, results: el.page.results };
+									flush(function () {
+										var buttonElement = el.$$('#' + button.id);
+										assert.equal(buttonElement.dataTargetPage, button.target, 'on page ' + param.page + ' ' + button.id + '.dataTargetPage should be ' + button.target);
+										assert.equal(buttonElement.disabled, !button.enabled, 'on page ' + param.page + ' ' + button.id + '.disabled should be ' + (!button.enabled));
+										done();
+									});
 								});
-							});
-
-							test('previous', function (done) {
-								flush(function () {
-									var button = el.$$('#previous');
-									assert.equal(button.dataTargetPage, 1, 'on page ' + el.page.current + ' previous.dataTargetPage should be 1');
-									assert.equal(button.disabled, true, 'on page ' + el.page.current + ' previous.disabled should be true');
-									done();
-								});
-							});
-
-							test('next', function (done) {
-								flush(function () {
-									var button = el.$$('#next');
-									assert.equal(button.dataTargetPage, 2, 'on page ' + el.page.current + ' next.dataTargetPage should be 2');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' next.disabled should be false');
-									done();
-								});
-							});
-
-							test('last', function (done) {
-								flush(function () {
-									var button = el.$$('#last');
-									assert.equal(button.dataTargetPage, lastPage, 'on page ' + el.page.current + ' last.dataTargetPage should be ' + lastPage);
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' last.disabled should be false');
-									done();
-								});
-							});
-						});
-
-						suite('page 2', function () {
-							setup(function () {
-								el.page = { current: 2, size: el.page.size, results: el.page.results };
-							});
-
-							test('first', function (done) {
-								flush(function () {
-									var button = el.$$('#first');
-									assert.equal(button.dataTargetPage, 1, 'on page ' + el.page.current + ' first.dataTargetPage should be 1');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' first.disabled should be false');
-									done();
-								});
-							});
-
-							test('previous', function (done) {
-								flush(function () {
-									var button = el.$$('#previous');
-									assert.equal(button.dataTargetPage, 1, 'on page ' + el.page.current + ' previous.dataTargetPage should be 1');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' previous.disabled should be false');
-									done();
-								});
-							});
-
-							test('next', function (done) {
-								flush(function () {
-									var button = el.$$('#next');
-									assert.equal(button.dataTargetPage, 3, 'on page ' + el.page.current + ' next.dataTargetPage should be 3');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' next.disabled should be false');
-									done();
-								});
-							});
-
-							test('last', function (done) {
-								flush(function () {
-									var button = el.$$('#last');
-									assert.equal(button.dataTargetPage, lastPage, 'on page ' + el.page.current + ' last.dataTargetPage should be ' + lastPage);
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' last.disabled should be false');
-									done();
-								});
-							});
-						});
-
-						suite('page 3', function () {
-							setup(function () {
-								el.page = { current: 3, size: el.page.size, results: el.page.results };
-							});
-
-							test('first', function (done) {
-								flush(function () {
-									var button = el.$$('#first');
-									assert.equal(button.dataTargetPage, 1, 'on page ' + el.page.current + ' first.dataTargetPage should be 1');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' first.disabled should be false');
-									done();
-								});
-							});
-
-							test('previous', function (done) {
-								flush(function () {
-									var button = el.$$('#previous');
-									assert.equal(button.dataTargetPage, 2, 'on page ' + el.page.current + ' previous.dataTargetPage should be 2');
-									assert.equal(button.disabled, false, 'on page ' + el.page.current + ' previous.disabled should be false');
-									done();
-								});
-							});
-
-							test('next', function (done) {
-								flush(function () {
-									var button = el.$$('#next');
-									assert.equal(button.dataTargetPage, 3, 'on page ' + el.page.current + ' next.dataTargetPage should be 3');
-									assert.equal(button.disabled, true, 'on page ' + el.page.current + ' next.disabled should be true');
-									done();
-								});
-							});
-
-							test('last', function (done) {
-								flush(function () {
-									var button = el.$$('#last');
-									assert.equal(button.dataTargetPage, lastPage, 'on page ' + el.page.current + ' last.dataTargetPage should be ' + lastPage);
-									assert.equal(button.disabled, true, 'on page ' + el.page.current + ' last.disabled should be true');
-									done();
-								});
-							});
-						});
+							}
+						}
 					});
 
 					suite('click events', function () {
@@ -327,127 +154,70 @@
 							el.fire.restore();
 						});
 
-						suite('page 1', function () {
-							setup(function () {
-								el.page = { current: 1, size: el.page.size, results: el.page.results };
-							});
+						for (var p = 0; p < params.length; p++) {
+							var param = params[p];
 
-							test('first', function (done) {
-								flush(function () {
-									el.$$('#first').click();
-									assert(spy.withArgs('change-page').notCalled, 'change-page event should not have fired');
-									done();
-								});
-							});
+							for (var b = 0; b < param.buttons.length; b++) {
+								var button = param.buttons[b];
 
-							test('previous', function (done) {
-								flush(function () {
-									el.$$('#previous').click();
-									assert(spy.withArgs('change-page').notCalled, 'change-page event should not have fired');
-									done();
-								});
-							});
+								test('page ' + param.page + ': ' + button.id, function (done) {
+									el.page = { current: param.page, size: el.page.size, results: el.page.results };
+									flush(function () {
+										el.$$('#' + button.id).click();
 
-							test('next', function (done) {
-								flush(function () {
-									el.$$('#next').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: el.page.current + 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
+										if (button.enabled) {
+											assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
+											assert(spy.withArgs('change-page', { target: button.target }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
+										} else {
+											assert(spy.withArgs('change-page').notCalled, 'change-page event should not have fired');
+										}
+										done();
+									});
 								});
-							});
+							}
+						}
+					});
+				});
 
-							test('last', function (done) {
-								flush(function () {
-									el.$$('#last').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: lastPage }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
+				suite('page size', function () {
+					var menu;
+
+					setup(function () {
+						menu = el.$.perPageMenu;
+					});
+
+					test('setup', function (done) {
+						flush(function () {
+							assert.equal(menu.is, 'paper-dropdown-menu');
+							done();
 						});
+					});
 
-						suite('page 2', function () {
-							setup(function () {
-								el.page = { current: 2, size: el.page.size, results: el.page.results };
-							});
+					suite('options', function () {
+						var params = [];
+						params[0] = { results: 0, options: 0 };
+						params[1] = { results: 3, options: 1 };
+						params[2] = { results: 5, options: 1 };
+						params[3] = { results: 6, options: 2 };
+						params[4] = { results: 11, options: 3 };
+						params[5] = { results: 25, options: 3 };
+						params[6] = { results: 100, options: 5 };
+						params[7] = { results: 101, options: 6 };
+						params[8] = { results: 9999, options: 6 };
 
-							test('first', function (done) {
+						for (var i = 0; i < params.length; i++) {
+							var p = params[i];
+
+							test('with ' + p.results + ' results', function (done) {
+								el.page = { current: el.page.current, size: el.page.current, results: p.results };
 								flush(function () {
-									el.$$('#first').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
+									var biggest = Math.max.apply(null, el._pageSizeOptions);
+									assert.equal(biggest, p.results, 'expected the biggest page size (' + biggest + ') to == the number of results (' + el.page.results + ')');
+									assert.equal(el._pageSizeOptions.length, p.options, 'expected ' + p.options + ' options for page size but there were ' + el._pageSizeOptions.length);
 									done();
 								});
 							});
-
-							test('previous', function (done) {
-								flush(function () {
-									el.$$('#previous').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: el.page.current - 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
-
-							test('next', function (done) {
-								flush(function () {
-									el.$$('#next').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: el.page.current + 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
-
-							test('last', function (done) {
-								flush(function () {
-									el.$$('#last').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: lastPage }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
-						});
-
-						suite('page 3', function () {
-							setup(function () {
-								el.page = { current: 3, size: el.page.size, results: el.page.results };
-							});
-
-							test('first', function (done) {
-								flush(function () {
-									el.$$('#first').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
-
-							test('previous', function (done) {
-								flush(function () {
-									el.$$('#previous').click();
-									assert(spy.withArgs('change-page').calledOnce, 'change-page event should have fired once');
-									assert(spy.withArgs('change-page', { target: el.page.current - 1 }).calledOnce, 'change-page event fired but with wrong args: ' + JSON.stringify(spy.args));
-									done();
-								});
-							});
-
-							test('next', function (done) {
-								flush(function () {
-									el.$$('#next').click();
-									assert(spy.withArgs('change-page').notCalled, 'change-page event should not have fired');
-									done();
-								});
-							});
-
-							test('last', function (done) {
-								flush(function () {
-									el.$$('#last').click();
-									assert(spy.withArgs('change-page').notCalled, 'change-page event should not have fired');
-									done();
-								});
-							});
-						});
+						}
 					});
 				});
 			});
