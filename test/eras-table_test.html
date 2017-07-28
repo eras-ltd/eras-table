@@ -15,7 +15,7 @@
 
 <body>
 	<template is='dom-bind' id='basic-table'>
-		<eras-table-display id='basic-fixture' data='{{data}}' page='{{page}}'>
+		<eras-table-display id='basic-fixture' data='{{data}}' page='{{page}}' id-property='prop-1'>
 			<eras-table-column property='prop-1' label='Column 1'></eras-table-column>
 			<eras-table-column property='prop-2' label='Column 2'></eras-table-column>
 			<eras-table-column property='prop-3' label='Column 3'></eras-table-column>
@@ -46,6 +46,17 @@
 
 				test('instantiation', function (done) {
 					assert.equal(el.is, 'eras-table-display');
+					done();
+				});
+
+				test('select type', function (done) {
+					// temporarily disable console.warn so the message about invalid values
+					// doesn't show up in the console (test failures are errors so should be OK)
+					var w = console.warn;
+					console.warn= function(){};
+					el.selectType = 'xxx';
+					console.warn = w;					
+					assert.equal(el.selectType, 'none');
 					done();
 				});
 
@@ -103,7 +114,7 @@
 						lastPage = Math.ceil(el.page.results / el.page.size);
 					});
 
-					suite('underlying object', function () {
+					suite('objects', function () {
 						for (var p = 0; p < params.length; p++) {
 							var param = params[p];
 
@@ -123,7 +134,7 @@
 						}
 					});
 
-					suite('repeated elements', function () {
+					suite('elements', function () {
 						for (var p = 0; p < params.length; p++) {
 							var param = params[p];
 
@@ -143,7 +154,7 @@
 						}
 					});
 
-					suite('click events', function () {
+					suite('events', function () {
 						var spy;
 
 						setup(function () {
@@ -193,18 +204,18 @@
 						});
 					});
 
-					suite('options', function () {
-						var params = [];
-						params[0] = { results: 0, options: 0 };
-						params[1] = { results: 3, options: 1 };
-						params[2] = { results: 5, options: 1 };
-						params[3] = { results: 6, options: 2 };
-						params[4] = { results: 11, options: 3 };
-						params[5] = { results: 25, options: 3 };
-						params[6] = { results: 100, options: 5 };
-						params[7] = { results: 101, options: 6 };
-						params[8] = { results: 9999, options: 6 };
+					var params = [];
+					params[0] = { results: 0, options: [] };
+					params[1] = { results: 3, options: [3] };
+					params[2] = { results: 5, options: [5] };
+					params[3] = { results: 6, options: [5, 6] };
+					params[4] = { results: 11, options: [5, 10, 11] };
+					params[5] = { results: 25, options: [5, 10, 25] };
+					params[6] = { results: 100, options: [5, 10, 25, 50, 100] };
+					params[7] = { results: 101, options: [5, 10, 25, 50, 100, 101] };
+					params[8] = { results: 9999, options: [5, 10, 25, 50, 100, 9999] };
 
+					suite('objects', function () {
 						for (var i = 0; i < params.length; i++) {
 							var p = params[i];
 
@@ -213,10 +224,68 @@
 								flush(function () {
 									var biggest = Math.max.apply(null, el._pageSizeOptions);
 									assert.equal(biggest, p.results, 'expected the biggest page size (' + biggest + ') to == the number of results (' + el.page.results + ')');
-									assert.equal(el._pageSizeOptions.length, p.options, 'expected ' + p.options + ' options for page size but there were ' + el._pageSizeOptions.length);
+									assert.deepEqual(el._pageSizeOptions, p.options, 'expected ' + p.options + ' options for page size but there were ' + el._pageSizeOptions)
 									done();
 								});
 							});
+						}
+					});
+
+					suite('elements', function () {
+						for (var i = 0; i < params.length; i++) {
+							var p = params[i];
+
+							test('with ' + p.results + ' results', function (done) {
+								el.page = { current: el.page.current, size: el.page.current, results: p.results };
+								flush(function () {																
+									// get list of page size options from value attr of paper-item elements
+									var elements = menu.querySelectorAll('paper-item');
+									var options = [];
+									for (var j = 0; j < elements.length; j++)
+										options[j] = elements[j].value;
+									
+									var biggest = Math.max.apply(null, options);
+									assert.equal(biggest, p.results, 'expected the biggest page size (' + biggest + ') to == the number of results (' + el.page.results + ')');
+									assert.deepEqual(options, p.options, 'expected ' + p.options + ' options for page size but there were ' + options)
+									done();
+								});
+							});
+						}
+					});
+
+					suite('events', function () {
+						var spy;
+						var options = [5, 10, 25, 30];
+
+						suiteSetup(function () {							
+							el.page = { current: el.page.current, size: el.page.current, results: Math.max.apply(null, options) };
+						});
+
+						setup(function(){
+							spy = sinon.spy(el, 'fire');
+						});
+
+						teardown(function () {
+							el.fire.restore();
+						});
+
+						// this method of looping tests was inspired by this answer:
+						// https://stackoverflow.com/a/17316273/723645 
+						var dataTest = function (index, option) {
+							return function (done) {
+								flush(function () {
+									var button = menu.querySelectorAll("paper-item")[index];
+									button.click();
+									assert(spy.withArgs('change-per-page').calledOnce, 'change-per-page event should have fired once');
+									assert(spy.withArgs('change-per-page', { size: option }).calledOnce, 'change-per-page event fired but with wrong args: ' + JSON.stringify(spy.args));
+									done();
+								});
+							};
+						};
+
+						for (var i = 0; i < options.length; i++) {
+							var option = options[i];
+							test(option + ' per page', dataTest(i, option));
 						}
 					});
 				});

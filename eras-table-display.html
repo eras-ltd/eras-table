@@ -192,6 +192,25 @@ Property|Description|Default
 				},
 
 				/**
+				 * Name of the property that can be used to uniquely identify
+				 * each row of data.
+				 */
+				idProperty: String,
+
+				/**
+				 * The type of row selection to use. Allowed values are: 
+				 * - `none` 
+				 * - `single`
+				 * - `multi`
+				 * @type {String}
+				 */
+				selectType: {
+					type: String,
+					value: 'none',
+					observer: '_selectTypeChanged'
+				},
+
+				/**
 				 * Object containing information for pagination UI display. 
 				 * Is computed using the `page` property
 				 * @type {{ from:Number, to:Number }}
@@ -203,8 +222,7 @@ Property|Description|Default
 				},
 
 				/**
-				 * Objects defining the properties of the pagination buttons.
-				 * Each property should be a { id:String, icon:String, target:Number, enabled: Boolean }
+				 * Objects defining the properties of the pagination buttons.				
 				 * @type {{ id:String, icon:String, target:Number, enabled: Boolean }[]}
 				 */
 				_pagingButtons: {
@@ -229,8 +247,7 @@ Property|Description|Default
 			},
 
 			/**
-				* Gets the data for a given column from the supplied row and formats it for display.
-				* 
+				* Gets the data for a given column from the supplied row and formats it for display.				
 				* @param {Object} column Object from the `columns` property that represents the column to get the data for
 				* @param {Object} row Object from the `data` property that contains the data to be displayed
 				* @return {String} The data from the given row/column formatted using the `format` Function of the column
@@ -240,8 +257,7 @@ Property|Description|Default
 			},
 
 			/**
-			 * Computes the object containing information for pagination UI display.
-			 *
+			 * Computes the object containing information for pagination UI display.			
 			 * @param {Object} page Object from the `page` property
 			 * @return {{ from:Number, to:Number }}
 			 */
@@ -256,8 +272,7 @@ Property|Description|Default
 			},
 
 			/**
-			 * Computes the array of objects that are iterated over to produce the pagination buttons.
-			 *
+			 * Computes the array of objects that are iterated over to produce the pagination buttons.			
 			 * @param {Object} page Object from the `page` property
 			 * @return {{ id:String, icon: String, target:Number, enabled:Boolean }[]}
 			 */
@@ -310,9 +325,7 @@ Property|Description|Default
 			 * Function for the pagination buttons to call 'on-tap'. 
 			 * checks if the button is disabled (because even when disabled the
 			 * `tap` event can be triggered by calling `.click()`) then fires
-			 * a `change-page` event providing the target page pulled from the
-			 * button that was clicked.
-			 *
+			 * a `change-page` event.			
 			 * @return {{ target:Number }}
 			 */
 			_goToPage: function (e) {
@@ -322,9 +335,13 @@ Property|Description|Default
 					this.fire('change-page', { target: button.dataTargetPage });
 			},
 
-			_changePerPage: function(e) {
-				var menu = Polymer.dom(e).localTarget;
-				console.info('per page changed', menu);
+			/**
+			 * Function to be called when a new page size is selected.
+			 * Fires a `change-per-page` event with the requested page size.			
+			 * @return {{ size:Number }}
+			 */
+			_changePerPage: function (e) {
+				this.fire('change-per-page', { size: e.detail.item.value });
 			},
 
 			/**
@@ -339,6 +356,19 @@ Property|Description|Default
 				var loading = this.$.loading;
 				var heading = this.$.head;
 				loading.style.top = (loading.offsetHeight + heading.offsetHeight - 1) + 'px';
+			},
+
+			/**
+			 * Observer function to monitor the selectType property.
+			 * If the specified value is not one of the accepted values then
+			 * it will print a warning to the console and default to `none`
+			 */
+			_selectTypeChanged: function(selectType) {
+				var accepted = ['none','single','multi'];
+				if(accepted.indexOf(selectType) < 0) {
+					console.warn('"' + selectType + '" is not a valid value for select-type. Defaulting to "none". Valid values are: ' + accepted);
+					this.selectType = 'none';
+				}
 			}
 		});
 	</script>
