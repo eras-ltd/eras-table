@@ -2,6 +2,7 @@
 <link rel='import' href='../eras-table/eras-table-column.html'>
 <link rel='import' href='../eras-table/eras-table-classes.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
+<link rel='import' href='../paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../paper-item/paper-item.html'>
 <link rel='import' href='../paper-menu/paper-menu.html'>
@@ -28,10 +29,23 @@ Property|Description|Default
 				display: block;
 			}
 
-			#main-toolbar,
+			#toolbar,
 			#footer {
 				height: 64px;
 				padding: 0px 6px 0px 24px;
+			}
+
+			#toolbar {
+				margin-bottom: 10px;
+			}
+
+			#toolbar h1 {
+				font-size: 20px;
+			}
+
+			#toolbar[selection-type='none'] h1#select-count,
+			#toolbar:not([selection-type='none']) h1#header {
+				display: none;
 			}
 
 			div.table {
@@ -42,11 +56,23 @@ Property|Description|Default
 			div.cell {
 				padding: 6px 28px 6px 28px;
 				text-align: left;
-			}
-
-			div.cell {
 				border-bottom: 1px solid var(--border-colour, --paper-grey-400);
 				font-size: 13px;
+			}
+
+			div.cell.selector {
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+
+			div.cell.selector,
+			div.cell.selector paper-checkbox {
+				width: 18px;
+			}
+
+			div.table[select='none'] div.cell.selector,
+			div.table[select='single'] div.cell.selector.multi-selector paper-checkbox {
+				display: none !important;
 			}
 
 			div.cell.head,
@@ -102,20 +128,41 @@ Property|Description|Default
 		</style>
 		<slot name=''></slot>
 		<paper-material elevation='1'>
-			<div class='table' loading$='{{loading}}'>
+			<div id='toolbar' class='layout horizontal center'>
+				<h1 id='header'>{{heading}}</h1>
+				<h1 id="select-count">{{selectedIds.length}} Items Selected</h1>
+				<div class="flex"></div>
+				<div id="single-select-actions">
+					<slot name="single-select-actions"></slot>
+				</div>
+				<div id="multi-select-actions">
+					<slot name="multi-select-actions"></slot>
+				</div>
+				<div id='search'>
+					<paper-icon-button icon="swap-vert" on-tap="_showSort"></paper-icon-button>
+					<paper-icon-button icon="search" on-tap="_showFilter"></paper-icon-button>
+				</div>
+			</div>
+			<div class='table' loading$='{{loading}}' select$='{{select}}'>
 				<div id='loading' class='caption'>
 					<paper-progress indeterminate></paper-progress>
 				</div>
 				<div id='head' class='header'>
 					<div class='row'>
+						<div class='cell selector multi-selector'>
+							<paper-checkbox noink on-iron-change='_doMultiSelect'></paper-check-box>
+						</div>
 						<template is='dom-repeat' items='{{columns}}' as='column'>
 							<div class='cell head label'>{{column.label}}</div>
 						</template>
 					</div>
 				</div>
 				<div id='body' class='body'>
-					<template is='dom-repeat' items='{{data}}' as='row'>
+					<template is='dom-repeat' items='{{data}}' as='row' on-dom-change='_rowsChanged'>
 						<div class='row data'>
+							<div class='cell selector'>
+								<paper-checkbox noink checked$='{{_isSelected(row)}}' value='{{_getId(row)}}' on-iron-change='_doSingleSelect'></paper-checkbox>
+							</div>
 							<template is='dom-repeat' items='{{columns}}' as='column'>
 								<div class='cell'>{{getData(column, row)}}</div>
 							</template>
@@ -147,6 +194,12 @@ Property|Description|Default
 		Polymer({
 			is: 'eras-table-display',
 			properties: {
+				/**
+				 * Text to be displayed above the table
+				 * @type String
+				 */
+				heading: String,
+
 				/**
 					* Array of `eras-table-column` elements describing the columns to be used for the table.
 					* It should be filled during initialisation with `eras-table-column`s found in the 'columns' slot
@@ -198,16 +251,26 @@ Property|Description|Default
 				idProperty: String,
 
 				/**
+				 * Array of currently selected ids.
+				 * @type {String[]}
+				 */
+				selectedIds: {
+					type: Array,
+					value: [],
+					notify: true
+				},
+
+				/**
 				 * The type of row selection to use. Allowed values are: 
 				 * - `none` 
 				 * - `single`
 				 * - `multi`
 				 * @type {String}
 				 */
-				selectType: {
+				select: {
 					type: String,
 					value: 'none',
-					observer: '_selectTypeChanged'
+					observer: '_selectChanged'
 				},
 
 				/**
@@ -238,6 +301,26 @@ Property|Description|Default
 					type: Array,
 					computed: '_computePageSizeOptions(page)'
 				},
+
+				/**
+				 * Boolean specifying whether or not to react changes events
+				 * fired by the checkboxes for individual rows. Especially 
+				 * useful for ignoring events while setting up tests.
+				 */
+				_listenForSingleSelect: {
+					type: Boolean,
+					value: false
+				},
+
+				/**
+				 * Boolean specifying whether or not to react changes events
+				 * fired by the multi select checkbox. Especially 
+				 * useful for ignoring events while setting up tests.
+				 */
+				_listenForMultiSelect: {
+					type: Boolean,
+					value: false
+				}
 			},
 
 			ready: function () {
@@ -254,6 +337,15 @@ Property|Description|Default
 				*/
 			getData: function (column, row) {
 				return column.formatData(row[column.property]);
+			},
+
+			/**
+			 * Gets the value of the id property from the supplied row, identified by `idProperty`.
+			 * @param {Object} row Object from the `data` property
+			 * @return {String} Value for the id property from the supplied row.
+			 */
+			_getId: function (row) {
+				return row[this.idProperty];
 			},
 
 			/**
@@ -322,6 +414,15 @@ Property|Description|Default
 			},
 
 			/**
+			 * Function called when the dom-repeat has finished rendering the 
+			 * rows fo data
+			 */
+			_rowsChanged: function () {
+				this._listenForMultiSelect = true;
+				this._listenForSingleSelect = true;
+			},
+
+			/**
 			 * Function for the pagination buttons to call 'on-tap'. 
 			 * checks if the button is disabled (because even when disabled the
 			 * `tap` event can be triggered by calling `.click()`) then fires
@@ -359,16 +460,119 @@ Property|Description|Default
 			},
 
 			/**
-			 * Observer function to monitor the selectType property.
+			 * Observer function to monitor the select property.
 			 * If the specified value is not one of the accepted values then
 			 * it will print a warning to the console and default to `none`
 			 */
-			_selectTypeChanged: function(selectType) {
-				var accepted = ['none','single','multi'];
-				if(accepted.indexOf(selectType) < 0) {
-					console.warn('"' + selectType + '" is not a valid value for select-type. Defaulting to "none". Valid values are: ' + accepted);
-					this.selectType = 'none';
+			_selectChanged: function (select) {
+				var accepted = ['none', 'single', 'multi'];
+				if (accepted.indexOf(select) < 0) {
+					console.warn('"' + select + '" is not a valid value for select-type. Defaulting to "none". Valid values are: ' + accepted);
+					this.select = 'none';
 				}
+			},
+
+			/**
+			 * Checks the property specified by `idProperty` to see if it
+			 * is in the `selectedIds`.
+			 */
+			_isSelected: function (row) {
+				var id = row[this.idProperty];
+				return this.selectedIds.indexOf(id) >= 0;
+			},
+
+			/**
+			 * Adds or removes the id for all visible rows from `selectedIds`, and 
+			 * ensures the correct checkboxes are ticked. 
+			 * Listening to change events for single and multi select is turned off for 
+			 * the duration of this call.
+			 * Fires `selection-change` when finished
+			 * @return {{selectedIds:Number[]}
+			 */
+			_doMultiSelect: function (e) {
+				if (!this._listenForMultiSelect)
+					return;
+
+				this._listenForSingleSelect = false;
+				this._listenForMultiSelect = false;
+
+				var checked = e.target.checked;
+				var checkboxes = this.$.body.querySelectorAll('div.cell.selector paper-checkbox');
+
+				for (var i = 0; i < checkboxes.length; i++) {
+					var id = checkboxes[i].value;
+					var selected = this.selectedIds.indexOf(id) >= 0;
+
+					if (checked)
+						Polymer.dom(checkboxes[i]).setAttribute('checked', '');
+					else
+						Polymer.dom(checkboxes[i]).removeAttribute('checked');
+
+					if (checked && !selected)
+						this.push('selectedIds', id);
+
+					if (!checked && selected)
+						this.splice('selectedIds', this.selectedIds.indexOf(id), 1);
+				}
+
+				this._listenForSingleSelect = true;
+				this._listenForMultiSelect = true;
+
+				this.fire('selection-change', { selectedIds: this.selectedIds });
+			},
+
+			/**
+			 * Adds or removes the id for a specific row from `selectedIds` when the associated
+			 * check box is clicked, and ensures the correct checkboxes are ticked. 
+			 * Listening to change events for single and multi select is turned off for 
+			 * the duration of this call.
+			 * Fires `selection-change` when finished
+			 * @return {{selectedIds:Number[]}
+			 */
+			_doSingleSelect: function (e) {
+				if (!this._listenForSingleSelect)
+					return;
+
+				this._listenForSingleSelect = false;
+				this._listenForMultiSelect = false;
+
+				var checked = e.target.checked;
+				var id = e.target.value;
+
+				// if this id is already selected remove it regardless
+				if (this.selectedIds.indexOf(id) >= 0)
+					this.splice('selectedIds', this.selectedIds.indexOf(id), 1);
+
+				// if select type is single
+				// clear the selected ids list and uncheck all checkboxes
+				if (this.select == 'single' && checked) {
+					this.selectedIds = [];
+					var checkboxes = this.$.body.querySelectorAll('div.cell.selector paper-checkbox');
+					for (var i = 0; i < checkboxes.length; i++)
+						Polymer.dom(checkboxes[i]).removeAttribute('checked');
+				}
+
+				// put the id in the selected ids array and check this checkbox
+				if (checked) {
+					this.push('selectedIds', id);
+					Polymer.dom(e.target).setAttribute('checked');
+				}
+
+				// check/uncheck multiselect checkbox depending on current selection
+				if (this.select == 'multi') {
+					var unchecked = this.$.body.querySelectorAll('div.cell.selector paper-checkbox:not([checked])');
+					var multi = Polymer.dom(this.$.head.querySelector('div.cell.selector.multi-selector paper-checkbox'));
+
+					if (unchecked.length > 0)
+						multi.removeAttribute('checked');
+					else
+						multi.setAttribute('checked', '');
+				}
+
+				this._listenForSingleSelect = true;
+				this._listenForMultiSelect = true;
+
+				this.fire('selection-change', { selectedIds: this.selectedIds });
 			}
 		});
 	</script>

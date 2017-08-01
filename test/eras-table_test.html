@@ -14,25 +14,48 @@
 </head>
 
 <body>
-	<template is='dom-bind' id='basic-table'>
-		<eras-table-display id='basic-fixture' data='{{data}}' page='{{page}}' id-property='prop-1'>
+
+	<template is='dom-bind' id='basic-template'>
+		<eras-table-display id='basic-table' data='{{data}}' page='{{page}}' id-property='prop-1'>
 			<eras-table-column property='prop-1' label='Column 1'></eras-table-column>
 			<eras-table-column property='prop-2' label='Column 2'></eras-table-column>
 			<eras-table-column property='prop-3' label='Column 3'></eras-table-column>
 		</eras-table-display>
 	</template>
 	<script>
-		var table = document.querySelector('#basic-table');
-		table.data = [];
+		var basicApp = document.querySelector('#basic-template');
+		basicApp.data = [];
 
 		for (var row = 0; row < 3; row++) {
-			table.data[row] = {};
+			basicApp.data[row] = {};
 			for (var col = 1; col <= 3; col++) {
-				table.data[row]['prop-' + col] = 'data-' + row + '-prop-' + col;
+				basicApp.data[row]['prop-' + col] = 'data-' + row + '-prop-' + col;
 			}
 		}
 
-		table.page = { current: 1, size: 5, results: 12 };
+		basicApp.page = { current: 1, size: 5, results: 12 };
+	</script>
+
+	<template is='dom-bind' id='selection-template'>
+		<eras-table-display id='selection-table' data='{{data}}' page='{{page}}' select='none' id-property='prop-1' selected-ids='{{selectedIds}}'>
+			<eras-table-column property='prop-1' label='Column 1'></eras-table-column>
+			<eras-table-column property='prop-2' label='Column 2'></eras-table-column>
+			<eras-table-column property='prop-3' label='Column 3'></eras-table-column>
+		</eras-table-display>
+	</template>
+	<script>
+		var selectionApp = document.querySelector('#selection-template');
+		selectionApp.data = [];
+
+		for (var row = 0; row < 5; row++) {
+			selectionApp.data[row] = {};
+			for (var col = 1; col <= 3; col++) {
+				selectionApp.data[row]['prop-' + col] = 'data-' + row + '-prop-' + col;
+			}
+		}
+
+		selectionApp.page = { current: 1, size: 5, results: 12 };
+		selectionApp.selectedIds = ['data-1-prop-1', 'data-3-prop-1'];
 	</script>
 
 	<script>
@@ -41,7 +64,7 @@
 				var el;
 
 				setup(function () {
-					el = document.querySelector('#basic-fixture');
+					el = document.querySelector('#basic-table');
 				});
 
 				test('instantiation', function (done) {
@@ -53,10 +76,10 @@
 					// temporarily disable console.warn so the message about invalid values
 					// doesn't show up in the console (test failures are errors so should be OK)
 					var w = console.warn;
-					console.warn= function(){};
-					el.selectType = 'xxx';
-					console.warn = w;					
-					assert.equal(el.selectType, 'none');
+					console.warn = function () { };
+					el.select = 'xxx';
+					console.warn = w;
+					assert.equal(el.select, 'none', 'expected invalid value to default to "none" but it didn\'t');
 					done();
 				});
 
@@ -237,13 +260,13 @@
 
 							test('with ' + p.results + ' results', function (done) {
 								el.page = { current: el.page.current, size: el.page.current, results: p.results };
-								flush(function () {																
+								flush(function () {
 									// get list of page size options from value attr of paper-item elements
 									var elements = menu.querySelectorAll('paper-item');
 									var options = [];
 									for (var j = 0; j < elements.length; j++)
 										options[j] = elements[j].value;
-									
+
 									var biggest = Math.max.apply(null, options);
 									assert.equal(biggest, p.results, 'expected the biggest page size (' + biggest + ') to == the number of results (' + el.page.results + ')');
 									assert.deepEqual(options, p.options, 'expected ' + p.options + ' options for page size but there were ' + options)
@@ -257,11 +280,11 @@
 						var spy;
 						var options = [5, 10, 25, 30];
 
-						suiteSetup(function () {							
+						suiteSetup(function () {
 							el.page = { current: el.page.current, size: el.page.current, results: Math.max.apply(null, options) };
 						});
 
-						setup(function(){
+						setup(function () {
 							spy = sinon.spy(el, 'fire');
 						});
 
@@ -287,6 +310,194 @@
 							var option = options[i];
 							test(option + ' per page', dataTest(i, option));
 						}
+					});
+				});
+			});
+
+			suite('selection', function () {
+				var el;
+				var visibleIds;
+				var spy;
+
+				// either select or deselect all check boxes to start
+				function setupSelection(selected, visibleIds) {
+					el._listenForMultiSelect = false;
+					el._listenForSingleSelect = false;
+
+					var all = el.querySelectorAll('div.cell.selector paper-checkbox');
+					for (var i = 0; i < all.length; i++) {
+						if (selected)
+							Polymer.dom(all[i]).setAttribute('checked', '');
+						else
+							Polymer.dom(all[i]).removeAttribute('checked');
+					}
+
+					if (selected)
+						el.selectedIds = visibleIds;
+					else
+						el.selectedIds = [];
+
+					el._listenForMultiSelect = true;
+					el._listenForSingleSelect = true;
+				}
+
+				setup(function () {
+					el = document.querySelector('#selection-table');
+					visibleIds = el.data.map(function (d) { return d[el.idProperty]; });
+					spy = sinon.spy(el, 'fire');
+				});
+
+				teardown(function () {
+					el.fire.restore();
+				});
+
+				test('instantiation', function (done) {
+					assert.equal(el.is, 'eras-table-display');
+					done();
+				});
+
+				suite('pre selection', function () {
+					test('array length', function (done) {
+						assert.equal(2, el.selectedIds.length, 'expected 2 ids in array but found ' + el.selectedIds.length);
+						done();
+					});
+
+					test('checkboxes', function (done) {
+						flush(function () {
+							var checkboxes = el.$.body.querySelectorAll('paper-checkbox[checked]');
+							assert.equal(2, checkboxes.length, 'expected 2 of the checkboxes to be checked but found ' + checkboxes.length);
+							done();
+						});
+					});
+				});
+
+				suite('multi selection', function () {
+					var multi;
+
+					setup(function () {
+						el.select = 'multi';
+						multi = el.$.head.querySelector('.multi-selector paper-checkbox');
+					});
+
+					test('select all', function (done) {
+						setupSelection(false, visibleIds);
+
+						multi.click();
+
+						var checkboxes = el.$.body.querySelectorAll('paper-checkbox[checked]');
+						assert(spy.withArgs('selection-change').calledOnce, 'selection-change should have been fired once');
+						assert.equal(el.data.length, checkboxes.length, 'expected all ' + el.data.length + ' of the checkboxes to be checked but found ' + checkboxes.length);
+						assert(visibleIds.every(function (e) { return el.selectedIds.indexOf(e) >= 0; }), 'expected ids for all visible rows (' + visibleIds + ') to be in selectedIds (' + el.selectedIds + ')');
+						assert.equal(el.data.length, selectionApp.selectedIds.length, 'two way data binding not working, expected ' + el.data.length + ' but got ' + selectionApp.data.length);
+						done();
+					});
+
+					test('deselect all', function (done) {
+						setupSelection(true, visibleIds);
+
+						multi.click();
+
+						var checkboxes = el.$.body.querySelectorAll('paper-checkbox[checked]');
+						assert(spy.withArgs('selection-change').calledOnce, 'selection-change should have been fired once');
+						assert.equal(0, checkboxes.length, 'expected none of the checkboxes to be checked but found ' + checkboxes.length);
+						assert(visibleIds.every(function (e) { return el.selectedIds.indexOf(e) < 0; }), 'expected no ids for visible rows (' + visibleIds + ') to be in selectedIds (' + el.selectedIds + ')');
+						assert.equal(0, selectionApp.selectedIds.length, 'two way data binding not working, expected 0 but got ' + selectionApp.data.length);
+						done();
+					});
+
+					test('select one at a time', function (done) {
+						setupSelection(false, visibleIds);
+
+						var checkboxes = el.$.body.querySelectorAll('paper-checkbox');
+						for (var i = 0; i < checkboxes.length; i++)
+							checkboxes[i].click();
+
+						var selected = el.$.body.querySelectorAll('paper-checkbox[checked]');
+						assert.equal(el.data.length, spy.withArgs('selection-change').callCount, 'selection-change should have been fired ' + el.data.length + 'times');
+						assert.equal(el.data.length, selected.length, 'expected all ' + el.data.length + ' of the checkboxes to be checked but found ' + selected.length);
+						assert(visibleIds.every(function (e) { return el.selectedIds.indexOf(e) >= 0; }), 'expected ids for all visible rows (' + visibleIds + ') to be in selectedIds (' + el.selectedIds + ')');
+						assert.equal(el.data.length, selectionApp.selectedIds.length, 'two way data binding not working, expected ' + el.data.length + ' but got ' + selectionApp.data.length);
+						assert(multi.checked, 'expected the multiselect checkbox to be ticked');
+
+						done();
+					});
+
+					test('deselect one at a time', function (done) {
+						setupSelection(true, visibleIds);
+
+						var checkboxes = el.$.body.querySelectorAll('paper-checkbox');
+						for (var i = 0; i < checkboxes.length; i++)
+							checkboxes[i].click();
+
+						var selected = el.$.body.querySelectorAll('paper-checkbox[checked]');
+						assert.equal(el.data.length, spy.withArgs('selection-change').callCount, 'selection-change should have been fired ' + el.data.length + 'times');
+						assert.equal(0, selected.length, 'expected none of the checkboxes to be checked but found ' + selected.length);
+						assert(visibleIds.every(function (e) { return el.selectedIds.indexOf(e) < 0; }), 'expected no ids for visible rows (' + visibleIds + ') to be in selectedIds (' + el.selectedIds + ')');
+						assert.equal(0, selectionApp.selectedIds.length, 'two way data binding not working, expected 0 but got ' + selectionApp.data.length);
+						assert(!multi.checked, 'expected the multiselect checkbox to be unticked');
+
+						done();
+					});
+				});
+
+				suite('single selection', function () {
+					var checkboxes;
+
+					setup(function () {
+						el.select = 'single';
+						setupSelection(false, visibleIds);
+						checkboxes = el.$.body.querySelectorAll('div.cell.selector paper-checkbox');
+					});
+
+					test('select one', function (done) {
+						checkboxes[1].click();
+
+						assert.equal(1, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
+						var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
+						assert.equal(1, checked, 'expected only one to be selected, not ' + length);
+						assert(spy.withArgs('selection-change').calledOnce, 'selection-change should have been fired once')
+						done();
+					});
+
+					test('deselect one', function (done) {
+						el._listenForMultiSelect = false;
+						el._listenForSingleSelect = false;
+						
+						Polymer.dom(checkboxes[2]).setAttribute('checked','');
+						el.selectedIds = [checkboxes[2].value];
+						
+						el._listenForMultiSelect = true;
+						el._listenForSingleSelect = true;
+
+						checkboxes[2].click();
+						
+						assert.equal(0, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
+						var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
+						assert.equal(0, checked, 'expected only one to be selected, not ' + length);
+						assert(spy.withArgs('selection-change').calledOnce, 'selection-change should have been fired once')
+						done();
+					});
+
+					test('select same one', function (done) {
+						checkboxes[3].click();
+						checkboxes[3].click();
+
+						assert.equal(0, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
+						var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
+						assert.equal(0, checked, 'expected only one to be selected, not ' + length);
+						assert(spy.withArgs('selection-change').calledTwice, 'selection-change should have been fired twice')
+						done();
+					});
+
+					test('select a second', function (done) {
+						checkboxes[1].click();
+						checkboxes[3].click();
+
+						assert.equal(1, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
+						var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
+						assert.equal(1, checked, 'expected only one to be selected, not ' + length);
+						assert(spy.withArgs('selection-change').calledTwice, 'selection-change should have been fired twice')
+						done();
 					});
 				});
 			});
