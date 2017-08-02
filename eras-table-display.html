@@ -9,13 +9,27 @@
 <link rel='import' href='../paper-icon-button/paper-icon-button.html'>
 <link rel='import' href='../paper-material/paper-material.html'>
 <link rel='import' href='../paper-progress/paper-progress.html'>
+<link rel='import' href='../paper-tooltip/paper-tooltip.html'>
 <!--
 `eras-table-display` 
+
+Different elements can be displayed in the toolbar for single or multiple 
+selections. These elements can be anything that can be assigned to either 
+the `single-select-actions` or `multi-select-actions` slot.
+
+```html
+<eras-table-display>
+	<eras-table-column label='Col 1' property='prop-1'></eras-table-column>
+	<eras-table-column label='Col 2' property='prop-2'></eras-table-column>				
+	<paper-icon-button slot="multi-select-actions" icon="clear" on-tap="clearSelection"></paper-icon-button>
+</eras-table-display>
+```
 
 ### Styling
 
 Property|Description|Default
 --------|-----------|-------
+`--theme-colour`|Toolbar background, checkboxes, etc.|`--primary-color`
 `--header-colour`|Colour of the text in the header|`--paper-grey-700`
 `--footer-colour`|Colour of the text in the footer|`--paper-grey-700`
 `--border-colour`|Colour of the border between rows|`--paper-grey-400`
@@ -27,6 +41,11 @@ Property|Description|Default
 		<style include='iron-flex iron-flex-alignment eras-table-classes'>
 			:host {
 				display: block;
+			}
+
+			paper-checkbox {
+				--paper-checkbox-checked-ink-color: var(--theme-colour, --primary-color);
+				--paper-checkbox-checked-color: var(--theme-colour, --primary-color);
 			}
 
 			#toolbar,
@@ -43,9 +62,20 @@ Property|Description|Default
 				font-size: 20px;
 			}
 
-			#toolbar[selection-type='none'] h1#select-count,
-			#toolbar:not([selection-type='none']) h1#header {
+			#toolbar[current-selection-type='none'] h1#select-count,
+			#toolbar:not([current-selection-type='none']) h1#header,
+			#toolbar:not([current-selection-type='single']) div#single-select-actions,
+			#toolbar:not([current-selection-type='multi']) div#multi-select-actions {
 				display: none;
+			}
+
+			#toolbar:not([current-selection-type='none']) {
+				background-color: var(--theme-colour, --primary-color);
+				color: white;
+			}
+
+			#toolbar paper-tooltip {
+				width: 100px;
 			}
 
 			div.table {
@@ -53,10 +83,13 @@ Property|Description|Default
 				width: 100%;
 			}
 
+			div.row {
+				border-bottom: 1px solid var(--border-colour, --paper-grey-400);
+			}
+
 			div.cell {
 				padding: 6px 28px 6px 28px;
 				text-align: left;
-				border-bottom: 1px solid var(--border-colour, --paper-grey-400);
 				font-size: 13px;
 			}
 
@@ -73,6 +106,11 @@ Property|Description|Default
 			div.table[select='none'] div.cell.selector,
 			div.table[select='single'] div.cell.selector.multi-selector paper-checkbox {
 				display: none !important;
+			}
+
+			div.row.data:hover,
+			div.cell.hover {
+				background-color: var(--paper-grey-100);
 			}
 
 			div.cell.head,
@@ -126,21 +164,22 @@ Property|Description|Default
 				}
 			}
 		</style>
-		<slot name=''></slot>
 		<paper-material elevation='1'>
-			<div id='toolbar' class='layout horizontal center'>
+			<div id='toolbar' class='layout horizontal center' current-selection-type$='{{_currentSelectionType}}'>
 				<h1 id='header'>{{heading}}</h1>
-				<h1 id="select-count">{{selectedIds.length}} Items Selected</h1>
-				<div class="flex"></div>
+				<h1 id='select-count'>{{selectedIds.length}} Items Selected</h1>
+				<div class='flex'></div>
 				<div id="single-select-actions">
 					<slot name="single-select-actions"></slot>
 				</div>
 				<div id="multi-select-actions">
 					<slot name="multi-select-actions"></slot>
 				</div>
-				<div id='search'>
-					<paper-icon-button icon="swap-vert" on-tap="_showSort"></paper-icon-button>
-					<paper-icon-button icon="search" on-tap="_showFilter"></paper-icon-button>
+				<div>
+					<paper-icon-button id='sort' icon='swap-vert' on-tap='_showSort'></paper-icon-button>
+					<paper-tooltip for="sort" position="bottom">Sort data</paper-tooltip>
+					<paper-icon-button id='filter' icon='search' on-tap='_showFilter'></paper-icon-button>
+					<paper-tooltip for="filter" position="bottom">Filter data</paper-tooltip>
 				</div>
 			</div>
 			<div class='table' loading$='{{loading}}' select$='{{select}}'>
@@ -149,22 +188,26 @@ Property|Description|Default
 				</div>
 				<div id='head' class='header'>
 					<div class='row'>
-						<div class='cell selector multi-selector'>
+						<div class='cell selector multi-selector' data-index='-1'>
 							<paper-checkbox noink on-iron-change='_doMultiSelect'></paper-check-box>
 						</div>
 						<template is='dom-repeat' items='{{columns}}' as='column'>
-							<div class='cell head label'>{{column.label}}</div>
+							<div class='cell head label' data-index$='{{index}}' on-mouseover='_columnMouseOver' on-mouseout='_columnMouseOut'>
+								{{column.label}}
+							</div>
 						</template>
 					</div>
 				</div>
 				<div id='body' class='body'>
 					<template is='dom-repeat' items='{{data}}' as='row' on-dom-change='_rowsChanged'>
 						<div class='row data'>
-							<div class='cell selector'>
+							<div class='cell selector' data-index='-1'>
 								<paper-checkbox noink checked$='{{_isSelected(row)}}' value='{{_getId(row)}}' on-iron-change='_doSingleSelect'></paper-checkbox>
 							</div>
 							<template is='dom-repeat' items='{{columns}}' as='column'>
-								<div class='cell'>{{getData(column, row)}}</div>
+								<div class='cell' data-index$='{{index}}' on-mouseover='_columnMouseOver' on-mouseout='_columnMouseOut'>
+									{{getData(column, row)}}
+								</div>
 							</template>
 						</div>
 					</template>
@@ -320,13 +363,30 @@ Property|Description|Default
 				_listenForMultiSelect: {
 					type: Boolean,
 					value: false
-				}
+				},
+
+				/**
+				 * String representing the type of the current selection. 
+				 * Will always be one of `none` | `single` | `multi`
+				 * Must be updated within the selection methods as Polymer
+				 * doesn't keep track of primitive arrays like `selectedIds`
+				 * and following their suggestion of converting to arrays of
+				 * `{value:id}` would mean we can no longer use `selectedIds.IndexOf(id)`
+				 * which is unacceptable
+				 * @type {String}
+				 */
+				_currentSelectionType: {
+					type: String,
+					value: 'none'
+				},
 			},
 
 			ready: function () {
 				this._observer = Polymer.dom(this).observeNodes(function (i) {
 					this.columns = i.addedNodes.filter(function (n) { return n.tagName === 'ERAS-TABLE-COLUMN'; });
 				});
+
+				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);				
 			},
 
 			/**
@@ -337,6 +397,16 @@ Property|Description|Default
 				*/
 			getData: function (column, row) {
 				return column.formatData(row[column.property]);
+			},
+
+			/**
+			 * Clears all ids from `selectedIds` and unticks all checkboxes.
+			 */
+			clearSelection: function () {
+				this.selectedIds = [];
+				var checkboxes = this.querySelectorAll('div.table div.cell.selector paper-checkbox');
+				for (var i = 0; i < checkboxes.length; i++)
+					Polymer.dom(checkboxes[i]).removeAttribute('checked');
 			},
 
 			/**
@@ -404,7 +474,11 @@ Property|Description|Default
 			},
 
 			/**
-			 * Computes the options for page size that will be shown on the dropdown
+			 * Computes the options for page size that will be shown on the dropdown.
+			 * Ensures that none will be shown that are bigger than the number of results 
+			 * available.
+			 * @param {Object} page Object from the `page` property
+			 * @return {Number[]} De-duplicated and filtered array of page size options
 			 */
 			_computePageSizeOptions: function (page) {
 				return [5, 10, 25, 50, 100, page.results]
@@ -415,7 +489,7 @@ Property|Description|Default
 
 			/**
 			 * Function called when the dom-repeat has finished rendering the 
-			 * rows fo data
+			 * rows fo data.
 			 */
 			_rowsChanged: function () {
 				this._listenForMultiSelect = true;
@@ -426,20 +500,20 @@ Property|Description|Default
 			 * Function for the pagination buttons to call 'on-tap'. 
 			 * checks if the button is disabled (because even when disabled the
 			 * `tap` event can be triggered by calling `.click()`) then fires
-			 * a `change-page` event.			
-			 * @return {{ target:Number }}
+			 * a `change-page` event.	
+			 * @param {Object} e On tap event from pagination button
 			 */
 			_goToPage: function (e) {
 				var button = Polymer.dom(e).localTarget;
 
 				if (!button.disabled)
-					this.fire('change-page', { target: button.dataTargetPage });
+						this.fire('change-page', { target: button.dataTargetPage });
 			},
 
 			/**
 			 * Function to be called when a new page size is selected.
-			 * Fires a `change-per-page` event with the requested page size.			
-			 * @return {{ size:Number }}
+			 * Fires a `change-per-page` event with the requested page size.
+			 * @param {Object} e On tap event from `paper-dropdown-menu`
 			 */
 			_changePerPage: function (e) {
 				this.fire('change-per-page', { size: e.detail.item.value });
@@ -448,7 +522,9 @@ Property|Description|Default
 			/**
 			 * When the `loading` property is changed this function updates the
 			 * position of the loading indicator. `top: 29px` is set in style but
-			 * if a label wraps it may be more than this
+			 * if a label wraps it may be more than this.
+			 * @param {Boolean} newValue
+			 * @param {Boolean} oldValue
 			 */
 			_loadingChanged: function (newValue, oldValue) {
 				if (oldValue === undefined)
@@ -462,7 +538,8 @@ Property|Description|Default
 			/**
 			 * Observer function to monitor the select property.
 			 * If the specified value is not one of the accepted values then
-			 * it will print a warning to the console and default to `none`
+			 * it will print a warning to the console and default to `none`.
+			 * @param {String} select
 			 */
 			_selectChanged: function (select) {
 				var accepted = ['none', 'single', 'multi'];
@@ -475,6 +552,8 @@ Property|Description|Default
 			/**
 			 * Checks the property specified by `idProperty` to see if it
 			 * is in the `selectedIds`.
+			 * @param {Object} row Object from `data` representing a row in the table
+			 * @return {Boolean} `true` if the rows id is in `selectedIds` otherwise `false`
 			 */
 			_isSelected: function (row) {
 				var id = row[this.idProperty];
@@ -482,12 +561,27 @@ Property|Description|Default
 			},
 
 			/**
+			 * Gets the `currentSelectionType` property, based on the number
+			 * of selected ids. 
+			 * @param {String[]} selectedIds Array of the currently selected ids
+			 * @return {String} One of `none` | `single` | `multi`
+			 */
+			_getCurrentSelectionType: function (selectedIds) {
+				if (selectedIds.length > 1)
+					return 'multi';
+				else if (selectedIds.length == 1)
+					return 'single';
+				else
+					return 'none';
+			},
+
+			/**
 			 * Adds or removes the id for all visible rows from `selectedIds`, and 
 			 * ensures the correct checkboxes are ticked. 
 			 * Listening to change events for single and multi select is turned off for 
 			 * the duration of this call.
-			 * Fires `selection-change` when finished
-			 * @return {{selectedIds:Number[]}
+			 * Fires `selection-change` when finished.
+			 * @param {Object} e `iron-change` event from multi select `paper-checkbox`
 			 */
 			_doMultiSelect: function (e) {
 				if (!this._listenForMultiSelect)
@@ -518,6 +612,7 @@ Property|Description|Default
 				this._listenForSingleSelect = true;
 				this._listenForMultiSelect = true;
 
+				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
 				this.fire('selection-change', { selectedIds: this.selectedIds });
 			},
 
@@ -526,8 +621,8 @@ Property|Description|Default
 			 * check box is clicked, and ensures the correct checkboxes are ticked. 
 			 * Listening to change events for single and multi select is turned off for 
 			 * the duration of this call.
-			 * Fires `selection-change` when finished
-			 * @return {{selectedIds:Number[]}
+			 * Fires `selection-change` when finished.
+			 * @param {Object} e `iron-change` event from single select `paper-checkbox`
 			 */
 			_doSingleSelect: function (e) {
 				if (!this._listenForSingleSelect)
@@ -572,8 +667,51 @@ Property|Description|Default
 				this._listenForSingleSelect = true;
 				this._listenForMultiSelect = true;
 
+				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
 				this.fire('selection-change', { selectedIds: this.selectedIds });
+			},
+
+			/**
+			 * Adds `hover` class to all cells with the same value for `data-index`
+			 * as the cell being hovered over.
+			 * @param {Object} e `mouseover` event from table cell
+			 */
+			_columnMouseOver: function (e) {
+				var index = Polymer.dom(e).localTarget.getAttribute('data-index');
+				var cells = this.querySelectorAll('div.cell[data-index="' + index + '"]');
+				for (var i = 0; i < cells.length; i++)
+					Polymer.dom(cells[i]).classList.add('hover');
+			},
+
+			/**
+			 * Removes `hover` class to all cells with the same value for `data-index`
+			 * as the cell no longer being hovered over.
+			 * @param {Object} e `mouseout` event from table cell
+			 */
+			_columnMouseOut: function (e) {
+				var index = Polymer.dom(e).localTarget.getAttribute('data-index');
+				var cells = this.querySelectorAll('div.cell[data-index="' + index + '"]');
+				for (var i = 0; i < cells.length; i++)
+					Polymer.dom(cells[i]).classList.remove('hover');
 			}
+
+			/**
+			 * Fired when one of the pagination buttons is tapped
+			 * @event change-page
+			 * @param {{target:Number}} detail
+			 */
+
+			/**
+			 * Fired when a new option is chosen from the per-page selectlist
+			 * @event change-per-page
+			 * @param {{size:Number}} detail
+			 */
+
+			/**
+			 * Fired when a rows are selected or deselected (multiselect only fires it once)
+			 * @event selection-change
+			 * @param {{selectedIds:String[]}} detail
+			 */
 		});
 	</script>
 </dom-module>

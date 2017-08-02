@@ -10,7 +10,8 @@
     "paper-dropdown-menu": "1",
     "paper-menu": "1",
     "paper-item": "1",
-    "paper-checkbox": "1"
+    "paper-checkbox": "1",
+    "paper-tooltip": "1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
