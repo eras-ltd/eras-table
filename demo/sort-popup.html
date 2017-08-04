@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-sort-switch demo</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+
+  <link rel='import' href='../../paper-styles/color.html'>
+  <link rel='import' href='../../paper-styles/typography.html'>
+  <link rel='import' href='../../paper-button/paper-button.html'>
+  <link rel='import' href='../../paper-item/paper-item.html'>
+  <link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
+  <link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+  <link rel='import' href='../eras-table-sort-popup.html'>
+
+  <style is='custom-style' include='demo-pages-shared-styles'>
+     :root {}
+  </style>
+</head>
+
+<body>
+  <div class='vertical-section-container centered'>
+    <h3>Sort popup demo</h3>
+    <demo-snippet>
+      <template is='dom-bind' id='app'>
+        <eras-table-sort-popup id='popup' columns='{{columns}}' sort='{{sort}}'></eras-table-sort-popup>
+        <paper-button on-tap='open' raised>Open</paper-button>
+        <template is='dom-repeat' items='{{sort}}'>
+          <paper-item>{{item.property}} - {{item.direction}}</paper-item>
+        </template>
+      </template>
+      <script>
+        var app = document.querySelector('#app');
+
+        app.columns = [
+          { property: 'property 1', label: 'Column 1', canSort: true },
+          { property: 'property 2', label: 'Column 2', canSort: false },
+          { property: 'property 3', label: 'Column 3', canSort: true },
+          { property: 'property 4', label: 'Column 4', canSort: false },
+          { property: 'property 5', label: 'Column 5', canSort: true },
+        ];
+
+        app.sort = [];
+
+        app.open = function () {
+          app.$.popup.open();
+        }
+      </script>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>

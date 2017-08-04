@@ -32,31 +32,13 @@
 				canSort: {
 					type: Boolean,
 					value: false
-				},
-
-				/** Boolean specifying whether the data is currently sorted by this column. */
-				sorted: {
-					type: Boolean,
-					value: false
-				},
-
-				/** String specifying which direction the data is sorted in (asc/desc). */
-				direction: {
-					type: String,
-					value: 'asc'
-				},
+				},				
 
 				/** Boolean specifying whether the data can be filtered by this column. */
 				canFilter: {
 					type: Boolean,
 					value: false
 				},
-
-				/** Boolean specifying whether the data is currently filtered by this column. */
-				filtered: {
-					type: Boolean,
-					value: false
-				}
 			},
 			formatData: function (data) {
 				if (data === undefined)

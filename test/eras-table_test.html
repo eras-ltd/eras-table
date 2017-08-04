@@ -334,8 +334,8 @@
 								flush(function () {
 									var button = menu.querySelectorAll("paper-item")[index];
 									button.click();
-									assert(spy.withArgs('change-per-page').calledOnce, 'change-per-page event should have fired once');
-									assert(spy.withArgs('change-per-page', { size: option }).calledOnce, 'change-per-page event fired but with wrong args: ' + JSON.stringify(spy.args));
+									assert(spy.withArgs('per-page-change').calledOnce, 'per-page-change event should have fired once');
+									assert(spy.withArgs('per-page-change', { size: option }).calledOnce, 'per-page-change event fired but with wrong args: ' + JSON.stringify(spy.args));
 									done();
 								});
 							};

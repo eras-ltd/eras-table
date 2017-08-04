@@ -1,22 +1,17 @@
 <link rel='import' href='../polymer/polymer.html'>
 <link rel='import' href='../eras-table/eras-table-column.html'>
 <link rel='import' href='../eras-table/eras-table-classes.html'>
-<link rel='import' href='../eras-table/eras-table-sort-switch.html'>
+<link rel='import' href='../eras-table/eras-table-sort-popup.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
 <link rel='import' href='../iron-icon/iron-icon.html'>
 <link rel='import' href='../iron-icons/iron-icons.html'>
-<link rel='import' href='../iron-icons/editor-icons.html'>
 <link rel='import' href='../paper-checkbox/paper-checkbox.html'>
-<link rel='import' href='../paper-dialog/paper-dialog.html'>
-<link rel='import' href='../paper-dialog-scrollable/paper-dialog-scrollable.html'>
 <link rel='import' href='../paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../paper-icon-button/paper-icon-button.html'>
-<link rel='import' href='../paper-item/paper-item.html'>
 <link rel='import' href='../paper-material/paper-material.html'>
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-progress/paper-progress.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
-<link rel='import' href='../polymer-sortablejs/polymer-sortablejs.html'>
 <!--
 `eras-table-display` 
 
@@ -169,48 +164,7 @@ Property|Description|Default
 					text-align: right;
 					font-size: 12px;
 				}
-			}
-
-			#sortPopup paper-dialog-scrollable {
-				min-height: 144px;
-			}
-
-			#sortPropertyOptions paper-item {
-				cursor: pointer;
-			}
-
-			.sort-direction[data-direction='asc'] {
-				transform: rotate(180deg);
-			}
-
-			.sort-direction[data-direction='desc'] {
-				transform: rotate(0deg);
-			}
-
-			.sort-item {
-				padding: 0;
-			}
-
-			.sort-item iron-icon.sort-direction {
-				padding: 0px 5px;
-				width: 20px;
-				height: 20px;
-				color: var(--paper-grey-500);
-			}
-
-			.sort-item .handle {
-				cursor: pointer;
-				cursor: -webkit-grab;
-				cursor: -moz-grab;
-				cursor: grab;
-			}
-
-			.sort-item .handle:active {
-				cursor: move;
-				cursor: -webkit-grabbing;
-				cursor: -moz-grabbing;
-				cursor: grabbing;
-			}
+			}			
 		</style>
 		<paper-material id='container' elevation='1'>
 			<div id='toolbar' class='layout horizontal center' current-selection-type$='{{_currentSelectionType}}'>
@@ -278,45 +232,9 @@ Property|Description|Default
 					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
 				</template>
 			</div>
-		</paper-material>
+		</paper-material>		
 
-		<paper-dialog id='sortPopup' modal>
-			<h2>Sort</h2>
-
-			<div class='layout horizontal center'>
-				<paper-dropdown-menu id='sortPropertyOptions' label='Column to sort by' error-message='You must select a column to sort by' on-selected-item-changed='_validateNewSortProperty'>
-					<paper-menu class='dropdown-content' selected='{{_newSortProperty}}' attr-for-selected='value'>
-						<template is='dom-repeat' items='{{_newSortPropertyOptions}}' as='option'>
-							<paper-item value='{{option.property}}'>{{option.label}}</paper-item>
-						</template>
-					</paper-menu>
-				</paper-dropdown-menu>
-				<eras-table-sort-switch direction='{{_newSortDirection}}'></eras-table-sort-switch>
-				<div class='flex'></div>
-				<paper-icon-button icon='add' on-tap='_addNewSort'></paper-icon-button>
-			</div>
-
-			<paper-dialog-scrollable>
-				<paper-listbox>
-					<sortable-js handle='.handle'>
-						<template is='dom-repeat' items='{{_newSort}}'>
-							<paper-item class='sort-item'>
-								<iron-icon class='handle' icon='editor:drag-handle'></iron-icon>
-								<iron-icon class='sort-direction' icon='arrow-upward' data-direction$='{{item.direction}}'></iron-icon>
-								<div>{{_getSortDescription(item.property, columns)}}</div>
-								<div class='flex'></div>
-								<paper-icon-button class='remove' icon='delete' on-tap='_removeSort' data-index='{{index}}'></paper-icon-button>
-							</paper-item>
-						</template>
-					</sortable-js>
-				</paper-listbox>
-			</paper-dialog-scrollable>
-
-			<div class='buttons'>
-				<paper-icon-button dialog-dismiss icon='close'></paper-icon-button>
-				<paper-icon-button dialog-confirm icon='check' on-tap='_updateSort'></paper-icon-button>
-			</div>
-		</paper-dialog>
+		<eras-table-sort-popup id='sortPopup' sort='{{sort}}' columns='{{columns}}'></eras-table-sort-popup>
 
 	</template>
 
@@ -359,48 +277,6 @@ Property|Description|Default
 				 * @type {{ property:String, direction:String }[]}
 				 */
 				sort: {
-					type: Array,
-					value: []
-				},
-
-				/**
-				 * The direction that will be used when a new level is added 
-				 * to the sort criteria.
-				 * @type {String}
-				 */
-				_newSortDirection: {
-					type: String,
-					value: 'asc'
-				},
-
-				/**
-				 * Options to choose from when selecting a column to sort by.
-				 * @type {{ property:String, label:String }[]}
-				 */
-				_newSortPropertyOptions: {
-					type: Array,
-					value: []
-				},
-
-				/**
-				 * The property that will be used when a new level is added 
-				 * to the sort criteria.
-				 * @type {String}
-				 */
-				_newSortProperty: {
-					type: String,
-					value: null
-				},
-
-				/**
-				 * Temporarily holds information about the sorting whilst
-				 * the user is editing the sort. Copied from `sort` when
-				 * editing begins, and back again after.
-				 * - property: The name of the property to sort by
-				 * - direction: The direction to sort in: `asc` | `desc`
-				 * @type {{ property:String, direction:String }[]}
-				 */
-				_newSort: {
 					type: Array,
 					value: []
 				},
@@ -556,20 +432,7 @@ Property|Description|Default
 			 */
 			_getId: function (row) {
 				return row[this.idProperty];
-			},
-
-			/**
-			 * Gets the label for the column specified by the supplied property
-			 * @param {Number} index Index of the sort object passed from the `dom-repeat`
-			 * @param {String} property Name of the property to find the label for 
-			 * @param {eras-table-column[]} columns Array of `eras-table-column` elements from `columns`
-			 * @return {String} Description of the sorting of a single property
-			 */
-			_getSortDescription: function (property, columns) {
-				if (!columns || columns.length == 0)
-					return;
-				return columns.filter(function (c) { return c.property == property; })[0].label;
-			},
+			},			
 
 			/**
 			 * Computes the object containing information for pagination UI display.			
@@ -852,73 +715,8 @@ Property|Description|Default
 			 * Show the "Sort" popup dialog
 			 */
 			_showSort: function () {
-				this._newSort = JSON.parse(JSON.stringify(this.sort));		
-				this._refreshNewSortPropertyOptions();
 				this.$.sortPopup.open();
-			},
-
-			/**
-			 * Refreshes the options for sort properties. 
-			 * Includes all columns where `canSort` is `true` and they 
-			 * aren't already in `_newSort`.
-			 */
-			_refreshNewSortPropertyOptions: function() {
-				var el = this;
-				this._newSortPropertyOptions = 
-					this.columns
-						.filter(function(c){ return c.canSort; })
-						.map(function(c) { return { property: c.property, label: c.label }; })
-						.filter(function(c){ return el._newSort.filter(function(s){ return s.property == c.property; }).length == 0; });
-			},
-
-			/**
-			 * Validates the selection for sort property and marks the 
-			 * drop down list as invalid if no selection
-			 * @return {Boolean} `true` if `_newSortProperty` has a value
-			 * otherwise `false`
-			 */
-			_validateNewSortProperty: function () {
-				if (!this._newSortProperty) {
-					this.$.sortPropertyOptions.setAttribute('invalid', '');
-					return false;
-				} else {
-					this.$.sortPropertyOptions.removeAttribute('invalid');
-					return true;
-				}
-			},
-
-			/**
-			 * Adds a new sort criteria to `_newSort` and clears the input
-			 */
-			_addNewSort: function (e) {
-				if (!this._validateNewSortProperty())
-					return;
-
-				this.push('_newSort', { property: this._newSortProperty, direction: this._newSortDirection });
-				this._newSortProperty = null;
-				this._newSortDirection = 'asc';
-				this.$.sortPropertyOptions.removeAttribute('invalid');
-				this._refreshNewSortPropertyOptions();
-			},
-
-			/**
-			 * Removes a sort critereon from `_newSort`
-			 */
-			_removeSort: function (e) {
-				var index = Polymer.dom(e).localTarget.dataIndex;				
-				this.splice('_newSort', index, 1);
-				this._refreshNewSortPropertyOptions();
-			},
-
-			/**
-			 * Copies the `_newSort` property into the `sort` property 
-			 * when the sort popup is confirmed, then fires a `sort-change`
-			 * event.
-			 */
-			_updateSort: function() {
-				this.sort = JSON.parse(JSON.stringify(this._newSort));
-				this.fire('sort-change', { sort: this.sort });
-			}
+			},			
 
 			/**
 			 * Fired when one of the pagination buttons is tapped
