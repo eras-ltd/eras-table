@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-sort-switch demo</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+
+  <link rel='import' href='../../paper-styles/color.html'>
+  <link rel='import' href='../../paper-styles/typography.html'>
+  <link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
+  <link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+  <link rel='import' href='../eras-table-sort-switch.html'>
+
+  <style is='custom-style' include='demo-pages-shared-styles'>
+     :root {}
+  </style>
+</head>
+
+<body>
+  <div class='vertical-section-container centered'>
+    <h3>Sort switch demo</h3>
+    <demo-snippet>
+      <template is='dom-bind' id='app'>
+        <eras-table-sort-switch direction='{{direction}}'></eras-table-sort-switch>
+        <div>Directon = {{direction}}</div>
+      </template>
+      <script>
+        var app = document.querySelector('#app');
+        app.direction = 'desc';
+      </script>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>

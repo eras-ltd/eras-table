@@ -11,9 +11,44 @@
 	<script src='../../web-component-tester/browser.js'></script>
 
 	<link rel='import' href='../eras-table-display.html'>
+	<link rel='import' href='../eras-table-sort-switch.html'>
 </head>
 
 <body>
+
+	<test-fixture id="sort-switch-fixture">
+		<template>
+			<eras-table-sort-switch id='sort-switch' direction='asc'></eras-table-sort-switch>
+		</template>
+	</test-fixture>
+	<script>
+		suite('eras-table-sort-switch', function () {
+			var el;
+			setup(function () {
+				el = fixture('sort-switch-fixture');
+			});
+			test('instantiation', function (done) {
+				assert.equal(el.is, 'eras-table-sort-switch');
+				done();
+			});
+			test('click', function (done) {
+				el.direction = 'asc';
+				el.click();
+				assert.equal('desc', el.direction, 'expected `direction` to have changed to "desc" but it is '+ el.direction);
+				done();
+			});
+			test('value', function (done) {
+				// temporarily disable console.warn so the message about invalid values
+				// doesn't show up in the console (test failures are errors so should be OK)
+				var w = console.warn;
+				console.warn = function () { };
+				el.direction = 'xxx';
+				console.warn = w;
+				assert.equal(el.direction, 'asc', 'expected invalid value to default to "asc" but it didn\'t');
+				done();
+			});
+		});
+	</script>
 
 	<template is='dom-bind' id='basic-template'>
 		<eras-table-display id='basic-table' data='{{data}}' page='{{page}}' id-property='prop-1'>
@@ -462,15 +497,15 @@
 					test('deselect one', function (done) {
 						el._listenForMultiSelect = false;
 						el._listenForSingleSelect = false;
-						
-						Polymer.dom(checkboxes[2]).setAttribute('checked','');
+
+						Polymer.dom(checkboxes[2]).setAttribute('checked', '');
 						el.selectedIds = [checkboxes[2].value];
-						
+
 						el._listenForMultiSelect = true;
 						el._listenForSingleSelect = true;
 
 						checkboxes[2].click();
-						
+
 						assert.equal(0, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
 						var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
 						assert.equal(0, checked, 'expected only one to be selected, not ' + length);

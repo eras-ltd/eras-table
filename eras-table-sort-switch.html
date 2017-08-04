@@ -1,0 +1,74 @@
+<link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
+<link rel='import' href='../iron-icon/iron-icon.html'>
+<link rel='import' href='../paper-ripple/paper-ripple.html'>
+<!--
+`eras-table-sort-switch`
+@demo demo/sort-switch.html
+-->
+<dom-module id="eras-table-sort-switch">
+  <template>
+    <style include='iron-flex iron-flex-alignment'>
+       :host {
+        display: inline-block;
+        cursor: pointer;        
+      }
+
+      #container {
+        position: relative;
+        padding: 8px;
+        border-radius: 20px;
+        width: 37px;
+      }
+
+      iron-icon {
+        transition: 300ms linear all;
+      }
+
+      iron-icon:last-child {
+        margin-left: -4px;
+      }
+
+      #container[data-direction='asc'] iron-icon#asc,
+      #container[data-direction='desc'] iron-icon#desc {
+        width: 24px;
+      }
+
+      #container[data-direction='asc'] iron-icon#desc,
+      #container[data-direction='desc'] iron-icon#asc {
+        width: 13px;
+        color: var(--paper-grey-500);
+      }
+    </style>
+    <div id='container' class='layout horizontal center' data-direction$='{{direction}}'>
+      <paper-ripple></paper-ripple>
+      <iron-icon id='asc' icon="arrow-downward"></iron-icon>
+      <iron-icon id='desc' icon="arrow-upward"></iron-icon>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'eras-table-sort-switch',
+      properties: {
+        direction: {
+          type: String,
+          value: 'asc',
+          notify: true,
+          observer: '_directionChanged'
+        }
+      },
+      listeners: {
+        'tap': 'switch'
+      },
+      switch: function () {
+        this.direction = this.direction == 'asc' ? 'desc' : 'asc';
+      },
+      _directionChanged: function(value) {
+        var accepted = ['asc','desc'];
+        if(accepted.indexOf(value) < 0) {
+          console.warn('"' + value + '" is not a valid value for `direction`. Defaulting to "asc". Valid values are: ' + accepted);
+          this.direction = 'asc';
+        }
+      }
+    });
+  </script>
+</dom-module>
