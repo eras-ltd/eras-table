@@ -12,6 +12,7 @@
 
 	<link rel='import' href='../eras-table-display.html'>
 	<link rel='import' href='../eras-table-sort-switch.html'>
+	<link rel='import' href='../eras-table-sort-popup.html'>
 </head>
 
 <body>
@@ -34,7 +35,7 @@
 			test('click', function (done) {
 				el.direction = 'asc';
 				el.click();
-				assert.equal('desc', el.direction, 'expected `direction` to have changed to "desc" but it is '+ el.direction);
+				assert.equal('desc', el.direction, 'expected `direction` to have changed to "desc" but it is ' + el.direction);
 				done();
 			});
 			test('value', function (done) {
@@ -46,6 +47,174 @@
 				console.warn = w;
 				assert.equal(el.direction, 'asc', 'expected invalid value to default to "asc" but it didn\'t');
 				done();
+			});
+		});
+	</script>
+
+	<template is='dom-bind' id='sort-template'>
+		<eras-table-sort-popup id='sort-popup'></eras-table-sort-popup>
+		<!-- <eras-table-column property='prop-1' label='Column 1' can-sort></eras-table-column>
+		<eras-table-column property='prop-2' label='Column 2'></eras-table-column>
+		<eras-table-column property='prop-3' label='Column 3' can-sort></eras-table-column> -->
+	</template>
+	<script>
+		var sortApp = document.querySelector('#sort-template');
+
+		suite('eras-table-sort-popup', function () {
+			var el;
+			var columns;
+			var spyFire;
+			var spyAdd;
+			var spyUpdate;
+			var spyRemove;
+
+			setup(function () {
+				el = document.querySelector('#sort-popup');
+				columns = [];
+				spyFire = sinon.spy(el, 'fire');
+				spyAdd = sinon.spy(el, '_add');
+				spyUpdate = sinon.spy(el, '_update');
+				spyRemove = sinon.spy(el, '_remove');
+
+
+				for (var i = 1; i <= 5; i++) {
+					var col = document.createElement('eras-table-column');
+					col.canSort = i < 4;
+					col.property = 'property-' + i;
+					col.label = 'Column ' + i;
+					columns.push(col);
+				}
+
+				el.columns = columns;
+				el._options = [];
+				el._direction = 'asc';
+				el._property = null;
+				el.sort = [];
+			});
+
+			teardown(function () {
+				el.fire.restore();
+				el._add.restore();
+				el._update.restore();
+				el._remove.restore();
+			});
+
+			test('instantiation', function (done) {
+				assert.equal(el.is, 'eras-table-sort-popup');
+				done();
+			});
+
+			test('columns', function (done) {
+				assert.equal(5, el.columns.length);
+				done();
+			});
+
+			test('open/close', function (done) {
+				el.open();
+				assert(spyFire.withArgs('iron-overlay-opened'.calledOnce), 'expected `iron-overlay-opened` to have been fired once');
+				el._close();
+				assert(spyFire.withArgs('iron-overlay-closed'.calledOnce), 'expected `iron-overlay-closed` to have been fired once');
+				done();
+			});
+
+			test('options filter', function (done) {
+				el.open();
+				assert.equal(3, el._options.length, 'expected only 3 sortable options, got ' + el._options.length);
+				el._close();
+				done();
+			});
+
+			suite('select', function () {
+				var selectTest = function (index) {
+					return function (done) {
+						var prop = columns[index].property;
+						flush(function () {
+							el.open();
+							el.$.optionsMenu.click();
+							flush(function () {
+								el.$.optionsMenu.querySelector('paper-item[value="' + prop + '"]').click();
+								assert.equal(prop, el._property, 'expected `' + prop + '` to be selected not `' + el._property + '`');
+								el._close();
+								done();
+							});
+						});
+					}
+				}
+
+				for (var i = 0; i < 3; i++)
+					test('column ' + (i + 1), selectTest(i));
+			});
+
+			test('direction switch', function (done) {
+				flush(function () {
+					el.open();
+					assert.equal('asc', el._direction, 'expected `asc` before interaction, not `' + el._direction + '`');
+					el.$.directionSwitch.click();
+					assert.equal('desc', el._direction, 'expected `desc` after first click, not `' + el._direction + '`');
+					el.$.directionSwitch.click();
+					assert.equal('asc', el._direction, 'expected `asc` after second click, not `' + el._direction + '`');
+					el._close();
+					done();
+				});
+			});
+
+			suite('add', function () {
+				var addTest = function (index) {
+					return function (done) {
+						var prop = columns[index].property;
+						flush(function () {
+							el.open();
+							el._property = prop;
+							el._direction = 'desc';
+							el.$.addButton.click();
+							assert(spyAdd.calledOnce, 'expected `_add` to be called once');
+							assert.equal(1, el._newSort.length, 'expected 1 sort criteria not ' + el._newSort.length);
+							el._close();
+							done();
+						});
+					}
+				}
+
+				for (var i = 0; i < 3; i++)
+					test('column ' + (i + 1), addTest(i));
+			});
+
+			test('update', function (done) {
+				flush(function () {
+					el.open();
+					el._newSort = [
+						{ property: columns[0].property, direction: 'asc' },
+						{ property: columns[2].property, direction: 'desc' },
+					];
+					el.$$('.buttons>paper-icon-button[dialog-confirm]').click();
+
+					assert(spyUpdate.calledOnce, 'expected `_update` to be called once');
+					assert.equal(2, el.sort.length, 'expected 2 sort criteria not ' + el.sort.length);
+					done();
+				});
+			});
+
+			test('remove', function (done) {
+				flush(function () {
+					el.open();
+					el._newSort = [
+						{ property: columns[0].property, direction: 'asc' },
+						{ property: columns[1].property, direction: 'asc' },
+						{ property: columns[2].property, direction: 'desc' },
+					];
+
+					for (var i = 0; i < 3; i++) {
+						el.$$('paper-item.sort-item paper-icon-button.remove').click();
+						var expected = 3 - (i + 1);
+						assert.equal(expected, el._newSort.length, 'expected ' + expected + ' criteria to be removed after ' + (i + 1) + 'clicks,  but found ' + el._newSort.length);
+					}
+
+					assert(spyRemove.calledThrice, 'expected `_remove` to be called 3x');
+					assert.equal(0, el._newSort.length, 'expected all criteria to be removed but found ' + el._newSort.length);
+
+					el._close();
+					done();
+				});
 			});
 		});
 	</script>

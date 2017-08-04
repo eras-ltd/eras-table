@@ -71,13 +71,13 @@
         <paper-dropdown-menu id='optionsMenu' label='Column to sort by' error-message='You must select a column to sort by' on-selected-item-changed='_validate'>
           <paper-menu class='dropdown-content' selected='{{_property}}' attr-for-selected='value'>
             <template is='dom-repeat' items='{{_options}}' as='option'>
-              <paper-item value='{{option.property}}'>{{option.label}}</paper-item>
+              <paper-item value$='{{option.property}}'>{{option.label}}</paper-item>
             </template>
           </paper-menu>
         </paper-dropdown-menu>
-        <eras-table-sort-switch direction='{{_direction}}'></eras-table-sort-switch>
+        <eras-table-sort-switch id='directionSwitch' direction='{{_direction}}'></eras-table-sort-switch>
         <div class='flex'></div>
-        <paper-icon-button icon='add' on-tap='_add'></paper-icon-button>
+        <paper-icon-button id='addButton' icon='add' on-tap='_add'></paper-icon-button>
       </div>
 
       <paper-dialog-scrollable>
@@ -168,6 +168,13 @@
         this._newSort = JSON.parse(JSON.stringify(this.sort));
         this._refreshOptions();
         this.$.sortPopup.open();
+      },
+
+      /**
+       * Closes the popup window (really only used for tests)
+       */
+      _close: function () {
+        this.$.sortPopup.close();
       },
 
       /**
