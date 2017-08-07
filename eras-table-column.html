@@ -25,6 +25,12 @@
 				/** Name of the property to be displayed in this column. */
 				property: String,
 
+				/** Type of the property. Supported types are: `string`, `date`, and `bool` */
+				type: {
+					type: String,
+					value: 'string'	
+				},
+
 				/** A function that will be used to format the data for display. */
 				format: Function,
 
