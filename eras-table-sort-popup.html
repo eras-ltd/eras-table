@@ -166,6 +166,8 @@
        */
       open: function () {
         this._newSort = JSON.parse(JSON.stringify(this.sort));
+        this._property = null;
+        this._direction = 'asc';
         this._refreshOptions();
         this.$.sortPopup.open();
       },

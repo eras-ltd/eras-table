@@ -53,9 +53,6 @@
 
 	<template is='dom-bind' id='sort-template'>
 		<eras-table-sort-popup id='sort-popup'></eras-table-sort-popup>
-		<!-- <eras-table-column property='prop-1' label='Column 1' can-sort></eras-table-column>
-		<eras-table-column property='prop-2' label='Column 2'></eras-table-column>
-		<eras-table-column property='prop-3' label='Column 3' can-sort></eras-table-column> -->
 	</template>
 	<script>
 		var sortApp = document.querySelector('#sort-template');
@@ -514,6 +511,25 @@
 							var option = options[i];
 							test(option + ' per page', dataTest(i, option));
 						}
+					});
+				});
+
+				suite('events', function () {
+					var spy;
+
+					setup(function(){
+						spy = sinon.spy(el, 'fire');
+					});
+
+					teardown(function(){
+						el.fire.restore();
+					});
+
+					test('sorting', function (done) {
+						var sort = [{ property: 'prop-1', direction: 'asc' }];
+						el.sort = sort;
+						assert(spy.withArgs('sort-change', { sort: sort }).calledOnce, 'expected `sort-change` to be fired once');
+						done();
 					});
 				});
 			});

@@ -112,7 +112,7 @@ Property|Description|Default
 
 			div.row.data:hover,
 			div.cell.hover {
-				background-color: var(--paper-grey-100);
+				background-color: var(--paper-grey-200);
 			}
 
 			div.cell.head,
@@ -123,6 +123,21 @@ Property|Description|Default
 
 			div.cell.head {
 				color: var(--header-colour, --paper-grey-700);
+			}
+
+			div.cell.head iron-icon.direction {
+				height: 15px;
+				width: 15px;
+				display: none;
+			}
+
+			div.cell.head[data-direction] {
+				 padding-left: 10px; 
+			}
+
+			div.cell.head[data-direction='asc'] iron-icon.direction.asc,
+			div.cell.head[data-direction='desc'] iron-icon.direction.desc {
+				display: inline-block;
 			}
 
 			#footer {
@@ -164,7 +179,7 @@ Property|Description|Default
 					text-align: right;
 					font-size: 12px;
 				}
-			}			
+			}
 		</style>
 		<paper-material id='container' elevation='1'>
 			<div id='toolbar' class='layout horizontal center' current-selection-type$='{{_currentSelectionType}}'>
@@ -193,9 +208,14 @@ Property|Description|Default
 						<div class='cell selector multi-selector' data-index='-1'>
 							<paper-checkbox noink on-iron-change='_doMultiSelect'></paper-check-box>
 						</div>
-						<template is='dom-repeat' items='{{columns}}' as='column'>
-							<div class='cell head label' data-index$='{{index}}' on-mouseover='_columnMouseOver' on-mouseout='_columnMouseOut'>
-								{{column.label}}
+						<template is='dom-repeat' items='{{columns}}' as='column' on-dom-change='_headersChanged'>
+							<div class='cell head label' data-index$='{{index}}' data-property$='{{column.property}}' on-mouseover='_columnMouseOver'
+							 on-mouseout='_columnMouseOut'>
+								<div class="">
+									<iron-icon class="direction asc" icon="arrow-downward"></iron-icon>									
+									<iron-icon class="direction desc" icon="arrow-upward"></iron-icon>
+									<span>{{column.label}}</span>
+								</div>
 							</div>
 						</template>
 					</div>
@@ -232,7 +252,7 @@ Property|Description|Default
 					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
 				</template>
 			</div>
-		</paper-material>		
+		</paper-material>
 
 		<eras-table-sort-popup id='sortPopup' sort='{{sort}}' columns='{{columns}}'></eras-table-sort-popup>
 
@@ -271,14 +291,15 @@ Property|Description|Default
 				},
 
 				/**
-				 * Array of objects describing how the data is sorted.
+				 * Array of objects describing how the data is sorted. Fires `sort-change` when changed.
 				 * - property: The name of the property to sort by
 				 * - direction: The direction to sort in: `asc` | `desc`
 				 * @type {{ property:String, direction:String }[]}
 				 */
 				sort: {
 					type: Array,
-					value: []
+					value: [],
+					observer: '_sortChanged'
 				},
 
 				/**
@@ -432,7 +453,7 @@ Property|Description|Default
 			 */
 			_getId: function (row) {
 				return row[this.idProperty];
-			},			
+			},
 
 			/**
 			 * Computes the object containing information for pagination UI display.			
@@ -510,6 +531,14 @@ Property|Description|Default
 			_rowsChanged: function () {
 				this._listenForMultiSelect = true;
 				this._listenForSingleSelect = true;
+			},
+
+			/**
+			 * Function called when the dom-repeat has finished rendering the
+			 * headers
+			 */
+			_headersChanged: function () {
+				this._refreshHeaderIcons(this.sort);
 			},
 
 			/**
@@ -716,7 +745,31 @@ Property|Description|Default
 			 */
 			_showSort: function () {
 				this.$.sortPopup.open();
-			},			
+			},
+
+			/**
+			 * Updates the icons in the headers cells that show sorting and filtering.
+			 * @param {{ property:String, direction:String }[]}
+			 */
+			_refreshHeaderIcons: function (sort) {
+				var headers = this.querySelectorAll('div.cell.head.label');
+				if (!headers || headers.length == 0)
+					return;
+
+				for (var i = 0; i < headers.length; i++)
+					headers[i].removeAttribute('data-direction');
+
+				for (var i = 0; i < sort.length; i++)
+					this.$$('div.cell.head.label[data-property="' + sort[i].property + '"]').setAttribute('data-direction', sort[i].direction);
+			},
+
+			/**
+			 * Fires the `sort-change` event in response to `sort` being changed.
+			 */
+			_sortChanged: function (sort) {
+				this._refreshHeaderIcons(sort);
+				this.fire('sort-change', { sort: sort });
+			},
 
 			/**
 			 * Fired when one of the pagination buttons is tapped
@@ -736,11 +789,11 @@ Property|Description|Default
 			 * @param {{selectedIds:String[]}} detail
 			 */
 
-			 /**
-				* Fired when the sort criteria are changed
-				* @event sort-change
-				* @param {{ sort: { property:String, direction:String }[] }} detail
-				*/
+			/**
+			 * Fired when the sort criteria are changed
+			 * @event sort-change
+			 * @param {{ sort: { property:String, direction:String }[] }} detail
+			 */
 		});
 	</script>
 </dom-module>
