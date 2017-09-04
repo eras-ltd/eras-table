@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-sort-switch test</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+  <script src='../../web-component-tester/browser.js'></script>
+
+  <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+  <link rel='import' href='../eras-table-sort-switch.html'>
+</head>
+
+<body>
+  <test-fixture id='eras-table-sort-switch-fixture'>
+    <template>
+      <eras-table-sort-switch direction='asc'></eras-table-sort-switch>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('eras-table-sort-switch', function () {
+      var el;
+
+      setup(function () {
+        el = fixture('eras-table-sort-switch-fixture');
+      });
+
+      test('instantiation', function () {
+        assert.equal(el.is, 'eras-table-sort-switch');
+      });
+
+      test('click', function (done) {
+        el.direction = 'asc';
+        el.click();
+        assert.equal('desc', el.direction, 'expected `direction` to have changed to "desc" but it is ' + el.direction);
+        done();
+      });
+
+      suite('warning', function(){
+        var warn;
+        
+        setup(function(){
+          warn = sinon.stub(console, 'warn');
+        });
+
+        teardown(function(){
+          warn.restore();
+        });
+
+        test('default on invalid', function(done){
+          el.direction = 'xxx';
+          assert(warn.calledOnce, 'expected `console.warn()` to have been called');
+          assert.equal(el.direction, 'asc', 'expected invalid value to default to "asc" but it didn\'t');
+          done();
+        });        
+      });
+    });
+  </script>
+</body>
+
+</html>

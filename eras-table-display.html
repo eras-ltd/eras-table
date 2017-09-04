@@ -1,7 +1,4 @@
 <link rel='import' href='../polymer/polymer.html'>
-<link rel='import' href='../eras-table/eras-table-column.html'>
-<link rel='import' href='../eras-table/eras-table-classes.html'>
-<link rel='import' href='../eras-table/eras-table-sort-popup.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
 <link rel='import' href='../iron-icon/iron-icon.html'>
 <link rel='import' href='../iron-icons/iron-icons.html'>
@@ -12,6 +9,9 @@
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-progress/paper-progress.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
+<link rel='import' href='eras-table-column.html'>
+<link rel='import' href='eras-table-classes.html'>
+<link rel='import' href='eras-table-sort-popup.html'>
 <!--
 `eras-table-display` 
 
@@ -36,7 +36,7 @@ Property|Description|Default
 `--footer-colour`|Colour of the text in the footer|`--paper-grey-700`
 `--border-colour`|Colour of the border between rows|`--paper-grey-400`
 
-@demo demo/index.html
+@demo demo/eras-table-display_demo.html
 -->
 <dom-module id='eras-table-display'>
 	<template>
@@ -58,6 +58,7 @@ Property|Description|Default
 
 			#toolbar {
 				margin-bottom: 10px;
+				transition: 100ms linear background-color;
 			}
 
 			#toolbar h1 {
@@ -240,16 +241,16 @@ Property|Description|Default
 				<div>Rows:</div>
 				<div>
 					<paper-dropdown-menu id='perPageMenu' no-label-float on-iron-select='_changePerPage' vertical-align='bottom'>
-						<paper-menu class='dropdown-content' selected='{{page.size}}' attr-for-selected='value'>
+						<paper-menu class='dropdown-content' selected='{{page.size}}' attr-for-selected='data-value'>
 							<template is='dom-repeat' items='{{_pageSizeOptions}}' as='option'>
-								<paper-item value='{{option}}'>{{option}}</paper-item>
+								<paper-item data-value$='{{option}}'>{{option}}</paper-item>
 							</template>
 						</paper-menu>
 					</paper-dropdown-menu>
 				</div>
 				<div>{{_pagingInfo.from}}-{{_pagingInfo.to}} of {{page.results}}</div>
 				<template is='dom-repeat' items='{{_pagingButtons}}' as='button'>
-					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
+					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page$='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
 				</template>
 			</div>
 		</paper-material>
@@ -337,7 +338,7 @@ Property|Description|Default
 				selectedIds: {
 					type: Array,
 					value: [],
-					notify: true
+					notify: true				
 				},
 
 				/**
@@ -551,8 +552,8 @@ Property|Description|Default
 			_goToPage: function (e) {
 				var button = Polymer.dom(e).localTarget;
 
-				if (!button.disabled)
-					this.fire('change-page', { target: button.dataTargetPage });
+				if (!button.disabled) 
+					this.fire('change-page', { target: button.dataset.targetPage });
 			},
 
 			/**
@@ -561,7 +562,8 @@ Property|Description|Default
 			 * @param {Object} e On tap event from `paper-dropdown-menu`
 			 */
 			_changePerPage: function (e) {
-				this.fire('per-page-change', { size: e.detail.item.value });
+				// console.log('_changePerPage', e.detail.item.dataset.value );				
+				this.fire('per-page-change', { size: e.detail.item.dataset.value });				
 			},
 
 			/**

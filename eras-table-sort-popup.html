@@ -1,5 +1,4 @@
 <link rel='import' href='../polymer/polymer.html'>
-<link rel='import' href='../eras-table/eras-table-sort-switch.html'>
 <link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
 <link rel='import' href='../iron-icon/iron-icon.html'>
 <link rel='import' href='../iron-icons/iron-icons.html'>
@@ -9,12 +8,14 @@
 <link rel='import' href='../paper-dropdown-menu/paper-dropdown-menu.html'>
 <link rel='import' href='../paper-icon-button/paper-icon-button.html'>
 <link rel='import' href='../paper-item/paper-item.html'>
+<link rel='import' href='../paper-listbox/paper-listbox.html'>
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
 <link rel='import' href='../polymer-sortablejs/polymer-sortablejs.html'>
+<link rel='import' href='eras-table-sort-switch.html'>
 <!--
 `eras-table-sort-popup`
-@demo demo/sort-popup.html
+@demo demo/eras-table-sort-popup_demo.html
 -->
 <dom-module id="eras-table-sort-popup">
   <template>
@@ -89,7 +90,7 @@
                 <iron-icon class='sort-direction' icon='arrow-upward' data-direction$='{{item.direction}}'></iron-icon>
                 <div>{{_getLabel(item.property, columns)}}</div>
                 <div class='flex'></div>
-                <paper-icon-button class='remove' icon='delete' on-tap='_remove' data-index='{{index}}'></paper-icon-button>
+                <paper-icon-button class='remove' icon='delete' on-tap='_remove' data-index$='{{index}}'></paper-icon-button>
               </paper-item>
             </template>
           </sortable-js>
@@ -128,11 +129,20 @@
           value: 'asc'
         },
 
-				/**
+        /**
 				 * Options to choose from when selecting a column to sort by.
 				 * @type {{ property:String, label:String }[]}
 				 */
-        _options: {
+         _options: {
+          type: Array,
+          value: []
+        },
+
+				/**
+				 * Columns available in the table.
+				 * @type {eras-table-column[]} Array of `eras-table-column` elements
+				 */
+        columns: {
           type: Array,
           value: []
         },

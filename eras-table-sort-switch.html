@@ -4,21 +4,21 @@
 <link rel='import' href='../paper-ripple/paper-ripple.html'>
 <!--
 `eras-table-sort-switch`
-@demo demo/sort-switch.html
+@demo demo/eras-table-sort-switch_demo.html
 -->
 <dom-module id="eras-table-sort-switch">
   <template>
     <style include='iron-flex iron-flex-alignment'>
        :host {
         display: inline-block;
-        cursor: pointer;        
+        cursor: pointer;
       }
 
       #container {
         position: relative;
         padding: 8px;
         border-radius: 20px;
-        width: 37px;
+        width: 33px;
       }
 
       iron-icon {
@@ -63,9 +63,9 @@
       switch: function () {
         this.direction = this.direction == 'asc' ? 'desc' : 'asc';
       },
-      _directionChanged: function(value) {
-        var accepted = ['asc','desc'];
-        if(accepted.indexOf(value) < 0) {
+      _directionChanged: function (value) {
+        var accepted = ['asc', 'desc'];
+        if (accepted.indexOf(value) < 0) {
           console.warn('"' + value + '" is not a valid value for `direction`. Defaulting to "asc". Valid values are: ' + accepted);
           this.direction = 'asc';
         }
