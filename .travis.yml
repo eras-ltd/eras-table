@@ -1,0 +1,19 @@
+language: node_js
+node_js: stable
+dist: trusty
+sudo: required
+addons:
+  firefox: latest
+  chrome: stable
+  sauce_connect: true
+before_script:
+- npm install -g bower polylint web-component-tester
+- bower install
+- polylint
+script:
+- xvfb-run wct --skip-plugin sauce
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then wct --skip-plugin local; fi
+env:
+  global:
+  - secure: nLxHOHBX58kaK3dWwQvoGbHgxwg7MLu175/fT9PsRfsykVQKKzazOKNyZD2/njVUgvuv4KX7DS1nTBR5Tf7FJQ+YyLKejSWJrDJP4SJitqyJ3CVojDdGEWYSSI3KCC9OBCni3ISPk37ZujIE2Ha+293wDqPGsWpkpmv2HI2p/P2EBkuL2QF57zMSh7q/sbw0lzbCmbm+/LI2yKGtyXJHSmRobSNkKCHJL0bnPXsD5SOJHLMbHgNXs2WHRNDm9drq/lZAc3K+hEe+5P730aNrOo52A6Z1Q/N/SpRiRjQR/clOjB4zL61Bnr3jOYdbM6k+hdj/OHfT4rfic2RCpBswNf/NX9/HIDfwzUskGdZHIijaQHlhX4UO+pCsoTJY0Za1muXiEwQnYA7S/zm3sWKVVOPbBUnjOe0Crn2jBlVyUj5MVargeG/kATRoOu6sMy1ATvrQV3gUcTH+a7MgeWIHEBKN106adiha+iMVv5OKGBYoQaGFmu+CMlatBFQJKei9Tw0q9ie56Hbv/8mC7kIBcYiZqpRDu/gR9EreX+0FYnszemgIhZ9iGttp//Z2XTEv3fijXOR7w737qb7X3y1Z72/XrQW48kD6Yrtvaybux4LVREfq0uXfCBmvxaF8L22lRtwVccIwUyVE9JBjqrNZUOG9VJd0Tch8nj3cuiaQ8II=
+  - secure: SpUJHQNXTDB17N7KaxE1xbKREbmuXA6J5ay/VkuQtOdGUzrYY5uvtkVafG9F7p7Hong3q6RwHttJpXFWD5h07N3mvB83+ltr+O6DpdoMZ3LN7A+KoL2/hlYBA4MXsInrblQW/5gsxELOUCCsw6I5tuZJHcfH+shejb7O4SfpJoQ1wKwA4qd2+vV/d2vcRxvlqTPadAUnRpTM0Cpc7FO3X8hPfaLwSOj7wZsnYLsIHD7AP55FmAZiBqmtAdVBHsSGiWyqLALOVUCQZI2kBFRrx+QATWeQR2JzAtuByfM/GuhEP4J5CD/Fe5b9CV6VDLQ9NcqOkaLt99AQ/4mFWcpJy+v/KdIDyzoi0Wt66C+6UdLPQR1OPFGh8TmNHjnRYSXXoQonAjVt3qh2TlH0OJ1EEJluXwKyDZotexXP0DZhqhA5OZn1LKjKHzgeVYTrL1qqnAiYESTr0tpMEi5gXRNoOSlKVOwYpFTKlkLVSGagZRY8/YKpZSu5EJz04Njjx3gjfbiufhQ8bsyNKqf3av89l707hVjESxGLaTKu0ZBM3fqIotGnq4lGbzyV7qHyy43HCrdGou8Y3R5KxLQV/JnoCNDd8Xv+GMnHWdagqmP9TOVyKSVSGL5LaigVBJYhIR0YgCnku0DN5EwsVizv7rCTrB/k1s4djVL2PZRUxTfXY2Y=
