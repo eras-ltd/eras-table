@@ -1,6 +1,6 @@
 {
   "name": "eras-table",
-  "main": "eras-table.html",
+  "main": "eras-table-display.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.9.0",
     "iron-flex-layout": "1",
