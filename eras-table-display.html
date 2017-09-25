@@ -133,7 +133,7 @@ Property|Description|Default
 			}
 
 			div.cell.head[data-direction] {
-				 padding-left: 10px; 
+				padding-left: 10px;
 			}
 
 			div.cell.head[data-direction='asc'] iron-icon.direction.asc,
@@ -213,7 +213,7 @@ Property|Description|Default
 							<div class='cell head label' data-index$='{{index}}' data-property$='{{column.property}}' on-mouseover='_columnMouseOver'
 							 on-mouseout='_columnMouseOut'>
 								<div class="">
-									<iron-icon class="direction asc" icon="arrow-downward"></iron-icon>									
+									<iron-icon class="direction asc" icon="arrow-downward"></iron-icon>
 									<iron-icon class="direction desc" icon="arrow-upward"></iron-icon>
 									<span>{{column.label}}</span>
 								</div>
@@ -338,7 +338,7 @@ Property|Description|Default
 				selectedIds: {
 					type: Array,
 					value: [],
-					notify: true				
+					notify: true
 				},
 
 				/**
@@ -425,6 +425,8 @@ Property|Description|Default
 				});
 
 				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
+
+				this._updateMultiSelect();
 			},
 
 			/**
@@ -552,7 +554,7 @@ Property|Description|Default
 			_goToPage: function (e) {
 				var button = Polymer.dom(e).localTarget;
 
-				if (!button.disabled) 
+				if (!button.disabled)
 					this.fire('change-page', { target: button.dataset.targetPage });
 			},
 
@@ -563,7 +565,7 @@ Property|Description|Default
 			 */
 			_changePerPage: function (e) {
 				// console.log('_changePerPage', e.detail.item.dataset.value );				
-				this.fire('per-page-change', { size: e.detail.item.dataset.value });				
+				this.fire('per-page-change', { size: e.detail.item.dataset.value });
 			},
 
 			/**
@@ -701,21 +703,27 @@ Property|Description|Default
 				}
 
 				// check/uncheck multiselect checkbox depending on current selection
-				if (this.select == 'multi') {
-					var unchecked = this.$.body.querySelectorAll('div.cell.selector paper-checkbox:not([checked])');
-					var multi = Polymer.dom(this.$.head.querySelector('div.cell.selector.multi-selector paper-checkbox'));
-
-					if (unchecked.length > 0)
-						multi.removeAttribute('checked');
-					else
-						multi.setAttribute('checked', '');
-				}
+				this._updateMultiSelect();
 
 				this._listenForSingleSelect = true;
 				this._listenForMultiSelect = true;
 
 				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
 				this.fire('selection-change', { selectedIds: this.selectedIds });
+			},
+
+			/**
+			 * Updates the multiselect checkbox based on whether all the other checkboxes are
+			 * checked or not.
+			 */
+			_updateMultiSelect: function () {
+				if (this.select == 'multi') {
+					var multi = Polymer.dom(this.$.head.querySelector('div.cell.selector.multi-selector paper-checkbox'));
+					if (this.selectedIds.length < this.data.length)
+						multi.removeAttribute('checked');
+					else
+						multi.setAttribute('checked', '');
+				}
 			},
 
 			/**
