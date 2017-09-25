@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-filter-popup test</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+  <script src='../../web-component-tester/browser.js'></script>
+
+  <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+  <link rel='import' href='../eras-table-filter-popup.html'>
+</head>
+
+<body>
+  <test-fixture id='eras-table-filter-popup-fixture'>
+    <template is='dom-template'>
+      <eras-table-filter-popup></eras-table-filter-popup>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('eras-table-filter-popup', function () {
+      var el;
+
+      setup(function () {
+        el = fixture('eras-table-filter-popup-fixture');
+      });
+
+      test('instantiation', function () {
+        assert.equal(el.is, 'eras-table-filter-popup');
+      });
+    });
+
+  </script>
+</body>
+
+</html>
