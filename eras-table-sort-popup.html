@@ -20,7 +20,7 @@
 <dom-module id="eras-table-sort-popup">
   <template>
     <style include='iron-flex iron-flex-alignment'>
-       :host {
+      :host {
         display: block;
       }
 
@@ -120,25 +120,6 @@
         },
 
         /**
-				 * The direction that will be used when a new level is added 
-				 * to the sort criteria.
-				 * @type {String}
-				 */
-        _direction: {
-          type: String,
-          value: 'asc'
-        },
-
-        /**
-				 * Options to choose from when selecting a column to sort by.
-				 * @type {{ property:String, label:String }[]}
-				 */
-         _options: {
-          type: Array,
-          value: []
-        },
-
-				/**
 				 * Columns available in the table.
 				 * @type {eras-table-column[]} Array of `eras-table-column` elements
 				 */
@@ -147,7 +128,16 @@
           value: []
         },
 
-				/**
+        /**
+				 * Options to choose from when selecting a column to sort by.
+				 * @type {{ property:String, label:String }[]}
+				 */
+        _options: {
+          type: Array,
+          value: []
+        },
+
+        /**
 				 * The property that will be used when a new level is added 
 				 * to the sort criteria.
 				 * @type {String}
@@ -155,6 +145,16 @@
         _property: {
           type: String,
           value: null
+        },
+
+        /**
+				 * The direction that will be used when a new level is added 
+				 * to the sort criteria.
+				 * @type {String}
+				 */
+        _direction: {
+          type: String,
+          value: 'asc'
         },
 
 				/**
