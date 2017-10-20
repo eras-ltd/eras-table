@@ -12,6 +12,7 @@
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
 <link rel='import' href='../polymer-sortablejs/polymer-sortablejs.html'>
+<link rel='import' href='eras-table-popup-behavior.html'>
 <link rel='import' href='eras-table-sort-switch.html'>
 <!--
 `eras-table-sort-popup`
@@ -24,7 +25,7 @@
         display: block;
       }
 
-      #sortPopup paper-dialog-scrollable {
+      #popup paper-dialog-scrollable {
         min-height: 144px;
       }
 
@@ -65,7 +66,7 @@
         cursor: grabbing;
       }
     </style>
-    <paper-dialog id='sortPopup' modal>
+    <paper-dialog id='popup' modal>
       <h2>Sort</h2>
 
       <div class='layout horizontal center'>
@@ -84,7 +85,7 @@
       <paper-dialog-scrollable>
         <paper-listbox>
           <sortable-js handle='.handle'>
-            <template is='dom-repeat' items='{{_newSort}}'>
+            <template is='dom-repeat' items='{{_temp}}'>
               <paper-item class='sort-item'>
                 <iron-icon class='handle' icon='editor:drag-handle'></iron-icon>
                 <iron-icon class='sort-direction' icon='arrow-upward' data-direction$='{{item.direction}}'></iron-icon>
@@ -120,34 +121,6 @@
         },
 
         /**
-				 * Columns available in the table.
-				 * @type {eras-table-column[]} Array of `eras-table-column` elements
-				 */
-        columns: {
-          type: Array,
-          value: []
-        },
-
-        /**
-				 * Options to choose from when selecting a column to sort by.
-				 * @type {{ property:String, label:String }[]}
-				 */
-        _options: {
-          type: Array,
-          value: []
-        },
-
-        /**
-				 * The property that will be used when a new level is added 
-				 * to the sort criteria.
-				 * @type {String}
-				 */
-        _property: {
-          type: String,
-          value: null
-        },
-
-        /**
 				 * The direction that will be used when a new level is added 
 				 * to the sort criteria.
 				 * @type {String}
@@ -157,41 +130,33 @@
           value: 'asc'
         },
 
-				/**
-				 * Temporarily holds information about the sorting whilst
-				 * the user is editing the sort. Copied from `sort` when
-				 * editing begins, and back again after.
-				 * - property: The name of the property to sort by
-				 * - direction: The direction to sort in: `asc` | `desc`
-				 * @type {{ property:String, direction:String }[]}
-				 */
-        _newSort: {
-          type: Array,
-          value: []
+        /** The `columns` property to check for inclusion in `_options` */
+        _columnCheckProperty: {
+          type: String,
+          value: 'canSort',
+          readOnly: true
         },
+
+        /** Name of the property that contains the sort criteria */
+        _criteriaProperty: {
+          type: String,
+          value: 'sort',
+          readOnly: true
+        }
       },
 
-      /**
-       * Opens the popup window
-       */
-      open: function () {
-        this._newSort = JSON.parse(JSON.stringify(this.sort));
-        this._property = null;
+      behaviors: [
+        Polymer.ErasTablePopupBehavior
+      ],
+
+      /** Resets all the parameters */
+      _reset: function() {
         this._direction = 'asc';
-        this._refreshOptions();
-        this.$.sortPopup.open();
-      },
-
-      /**
-       * Closes the popup window (really only used for tests)
-       */
-      _close: function () {
-        this.$.sortPopup.close();
-      },
+        Polymer.ErasTablePopupBehavior._reset.call(this);
+      },    
 
       /**
 			 * Gets the label for the column specified by the supplied property
-			 * @param {Number} index Index of the sort object passed from the `dom-repeat`
 			 * @param {String} property Name of the property to find the label for 
 			 * @param {eras-table-column[]} columns Array of `eras-table-column` elements from `columns`
 			 * @return {String} Description of the sorting of a single property
@@ -200,20 +165,6 @@
         if (!columns || columns.length == 0)
           return;
         return columns.filter(function (c) { return c.property == property; })[0].label;
-      },
-
-      /**
-			 * Refreshes the options for sort properties. 
-			 * Includes all columns where `canSort` is `true` and they 
-			 * aren't already in `_newSort`.
-			 */
-      _refreshOptions: function () {
-        var el = this;
-        this._options =
-          this.columns
-            .filter(function (c) { return c.canSort; })
-            .map(function (c) { return { property: c.property, label: c.label }; })
-            .filter(function (c) { return el._newSort.filter(function (s) { return s.property == c.property; }).length == 0; });
       },
 
 			/**
@@ -232,36 +183,31 @@
         }
       },
 
-			/**
-			 * Adds a new sort criteria to `_newSort` and clears the input
-			 */
-      _add: function (e) {
-        if (!this._validate())
-          return;
-
-        this.push('_newSort', { property: this._property, direction: this._direction });
-        this._property = null;
-        this._direction = 'asc';
-        this.$.optionsMenu.removeAttribute('invalid');
-        this._refreshOptions();
+      /**
+       * Gets an object containing the new sort parameters to add
+       * to the collection.
+       * @return {{ property: String, direction: String }}
+       */
+      _getParams: function() {
+        return { property: this._property, direction: this._direction };
       },
 
 			/**
-			 * Removes a sort critereon from `_newSort`
+			 * Removes a sort critereon from `_temp`
 			 */
       _remove: function (e) {
         var index = Polymer.dom(e).localTarget.dataIndex;
-        this.splice('_newSort', index, 1);
+        this.splice('_temp', index, 1);
         this._refreshOptions();
       },
 
 			/**
-			 * Copies the `_newSort` property into the `sort` property 
+			 * Copies the `_temp` property into the `sort` property 
 			 * when the sort popup is confirmed, then fires a `sort-change`
 			 * event.
 			 */
       _update: function () {
-        this.sort = JSON.parse(JSON.stringify(this._newSort));
+        this.sort = JSON.parse(JSON.stringify(this._temp));
         // this.fire('sort-change', { sort: this.sort });
       }
     });

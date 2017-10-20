@@ -25,10 +25,22 @@
 				/** Name of the property to be displayed in this column. */
 				property: String,
 
-				/** Type of the property. Supported types are: `string`, `date`, and `bool` */
+				/** 
+				 * Type of the property. Supported types are: `string`, `date`, `bool` 
+				 * and `enum`. If `enum` then `allowedValues` also needs to be provided.
+				 */
 				type: {
 					type: String,
 					value: 'string'	
+				},
+
+				/**
+				 * The allowed values for a column where `type` = `enum`
+				 * @type {String[]}
+				 */
+				allowedValues: {
+					type: Array,
+					value: []
 				},
 
 				/** A function that will be used to format the data for display. */

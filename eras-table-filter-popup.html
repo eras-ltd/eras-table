@@ -1,23 +1,289 @@
 <link rel='import' href='../polymer/polymer.html'>
+<link rel='import' href='../iron-flex-layout/iron-flex-layout-classes.html'>
+<link rel='import' href='../iron-icon/iron-icon.html'>
+<link rel='import' href='../iron-icons/iron-icons.html'>
+<link rel='import' href='../paper-checkbox/paper-checkbox.html'>
+<link rel='import' href='../paper-dialog/paper-dialog.html'>
+<link rel='import' href='../paper-dialog-scrollable/paper-dialog-scrollable.html'>
+<link rel='import' href='../paper-dropdown-menu/paper-dropdown-menu.html'>
+<link rel='import' href='../paper-icon-button/paper-icon-button.html'>
+<link rel='import' href='../paper-item/paper-item.html'>
+<link rel='import' href='../paper-listbox/paper-listbox.html'>
+<link rel='import' href='../paper-menu/paper-menu.html'>
+<link rel='import' href='../paper-tooltip/paper-tooltip.html'>
+<link rel='import' href='../eras-input/eras-input-daterange.html'>
+<link rel='import' href='eras-table-popup-behavior.html'>
 <!--
 `eras-table-filter-popup`
 @demo demo/eras-table-filter-popup_demo.html
 -->
 <dom-module id='eras-table-filter-popup'>
   <template>
-    <style>
-       :host {
+    <style include='iron-flex iron-flex-alignment'>
+      :host {
         display: block;
       }
+
+      div#input-container {
+        min-width: 280px;
+        margin-left: 20px;
+      }
+
+      #enumInput {
+        width: 100%
+      }
     </style>
+
+    <paper-dialog id='popup' modal>
+      <h2>Filter</h2>
+      <div class='layout horizontal center'>
+        <paper-dropdown-menu id='optionsMenu' label='Column to filter by' error-message='You must select a columns to search'>
+          <paper-menu class='dropdown-content' selected='{{_property}}' attr-for-selected='value'>
+            <template is='dom-repeat' items='{{_options}}' as='option'>
+              <paper-item value$='{{option.property}}'>{{option.label}}</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+
+        <div id='input-container'>
+          <template is='dom-if' if='[[_areEqual(_propertyType, "string")]]'>
+            <paper-input id='stringInput' label='Text to search for' error-message='You must enter something'></paper-input>
+          </template>
+
+          <template is='dom-if' if='[[_areEqual(_propertyType, "bool")]]'>
+            <paper-checkbox id='boolInput'></paper-checkbox>
+          </template>
+
+          <template is='dom-if' if='[[_areEqual(_propertyType, "date")]]'>
+            <eras-input-daterange id='dateInput' icon='' label='Enter a date range' error-message='You must provide a date range'></eras-input-daterange>
+          </template>
+
+          <template is='dom-if' if='[[_areEqual(_propertyType, "enum")]]'>
+            <paper-dropdown-menu id='enumInput' label='Value to filter for' error-message='You must select a value'>
+              <paper-menu class='dropdown-content' attr-for-selected='value'>
+                <template is='dom-repeat' items='{{_allowedEnumValues}}' as='option'>
+                  <paper-item value$='{{option}}'>{{option}}</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </template>
+        </div>
+
+        <div class='flex'></div>
+        <paper-icon-button id='addButton' class='self-end' icon='add' on-tap='_add'></paper-icon-button>
+      </div>
+
+      <div class='buttons'>
+        <paper-icon-button dialog-dismiss icon='close'></paper-icon-button>
+        <paper-icon-button dialog-confirm icon='check' on-tap='_update'></paper-icon-button>
+      </div>
+    </paper-dialog>
 
   </template>
   <script>
     Polymer({
       is: 'eras-table-filter-popup',
       properties: {
+        /**
+         * Array of objects describing how the data is filtered.
+         * - property: The name of the property to filter on
+         * - value: The value to filter with
+         * @type {{ property:String, value:String }[]}
+         */
+        filters: {
+          type: Array,
+          value: [],
+          notify: true
+        },
 
-      }
+        /** The `columns` property to check for inclusion in `_options` */
+        _columnCheckProperty: {
+          type: String,
+          value: 'canFilter',
+          readOnly: true
+        },
+
+        /** Name of the property that contains the filter criteria */
+        _criteriaProperty: {
+          type: String,
+          value: 'filters',
+          readOnly: true
+        },
+
+        /**
+         * The type of the property specified by `_property`.
+         * Supported types are: `string`, `date`, `bool` and `enum`
+         * @type {String}
+         */
+        _propertyType: {
+          type: String,
+          computed: '_computePropertyType(_property)'
+        },
+
+        /**
+         * When the columns specified by `_property` is of type `enum`
+         * then this will hold this list of allowed values.
+         * @type {String[]}
+         */
+        _allowedEnumValues: {
+          type: Array,
+          computed: '_computeAllowedEnumValues(columns, _property)'
+        }
+      },
+
+      behaviors: [
+        Polymer.ErasTablePopupBehavior
+      ],
+
+      /** Resets all the parameters */
+      _reset: function() {
+        
+        // TODO: I need to reconsider how the inputs are going to be hooked up
+        // they can be bound to properties but that feels messy as 5 props are 
+        // needed. alternatively I might be able to bind them all to 1 prop
+        // as when using the dom-if templates only one of the inputs exists at
+        // a time. another option is to show/hide them with css rules instead
+        // of the dom-if templates... good luck future me!
+
+        this.querySelector('#stringInput').value = null;
+        this.querySelector('#boolInput').setAttribute('checked','');
+        this.querySelector('#dateInput').from = null;
+        this.querySelector('#dateInput').to = null;
+        this.querySelector('#enumInput').selectedItem = null;
+        Polymer.ErasTablePopupBehavior._reset.call(this);
+      },
+
+      /**
+       * Computes `_propertyType` from `_property` by getting
+       * the type from the specified column. Defaults to `string`
+       * if no property is selected
+       * @param {String} property the name of the property that has been chosen
+       * @return {String} the type of the chosen property
+       */
+      _computePropertyType: function (property) {
+        var type = 'string';
+        var col = this.columns.filter(function (c) { return c.property == property })[0];
+
+        if (col)
+          type = col.type;
+
+        return type;
+      },
+
+      /**
+       * Gets `_allowedEnumValues` from the column in `columns`
+       * specified by `_property`.
+       * @param {eras-table-column[]} columns
+       * @param {String} _property
+       * @return {String[]}
+       */
+      _computeAllowedEnumValues: function (columns, property) {
+        var allowedValues = [];
+
+        var col = this.columns.filter(function (c) { return c.property == property })[0];
+        if (col)
+          allowedValues = col.allowedValues;
+
+        return allowedValues;
+      },
+
+      /**
+       * Stupid little function required because you can't do
+       * simple comparisons in a `dom-if`
+       * @param {Object} a
+       * @param {Object} b
+       * @return {Boolean}
+       */
+      _areEqual: function (a, b) {
+        return a === b;
+      },
+
+      _validate: function () {
+        if (!this._property) {
+          this.$.optionsMenu.setAttribute('invalid', '');
+          return false;
+        } else {
+          this.$.optionsMenu.removeAttribute('invalid');
+        }
+
+        switch (this._propertyType) {
+          case 'string':
+            return this._validateString();
+          case 'date':
+            return this._validateDate();
+          case 'enum':
+            return this._validateEnum();
+          case 'bool':
+          default:
+            return true;
+        }
+      },
+
+      _validateString: function () {
+        var input = this.querySelector('#stringInput');
+
+        if (!input.value) {
+          input.setAttribute('invalid', '');
+          return false;
+        } else {
+          input.removeAttribute('invalid');
+          return true;
+        }
+      },
+
+      _validateDate: function() {
+        var input = this.querySelector('#dateInput');
+
+        if(input.from || input.to) {
+          input.removeAttribute('invalid');
+          return true;
+        } else {
+          input.setAttribute('invalid', '');
+          return false;
+        }
+      },
+
+      _validateEnum: function() {
+        var select = this.querySelector('#enumInput');
+
+        if(!select.selectedItem) {
+          select.setAttribute('invalid', '');
+          return false;
+        } else {
+          select.removeAttribute('invalid');
+          return true;
+        }
+      },
+
+      /**
+       * Gets an object containing the new filter parameters to add
+       * to the collection.
+       * @return {{ property: String, value: String }}
+       */
+       _getParams: function() {
+        var value;
+        switch (this._propertyType) {
+          case 'string':
+            value = this.querySelector('#stringInput').value;
+            break;
+          
+          case 'bool':
+            value = this.querySelector('#boolInput').checked;
+            break;
+          
+          case 'date':
+            var input = this.querySelector('#dateInput');
+            value = input.from + ':' + input.to;
+            break;
+
+          case 'enum':            
+            value = this.querySelector('#enumInput').selectedItem.value;
+            break;
+        }
+
+        console.log('_getParams', value);
+        return { property: this._property, value: value };
+      },
     });
   </script>
 </dom-module>

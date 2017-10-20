@@ -1,0 +1,150 @@
+<link rel='import' href='../polymer/polymer.html'>
+<script>
+  /**
+   * This behaviour simply contains some common functionality
+   * between the popups used for `eras-table-display`
+   *
+   * @polymerBehavior Polymer.ErasTablePopupBehavior
+   */
+  Polymer.ErasTablePopupBehavior = {
+    properties: {
+      /**
+       * Columns available in the table.
+       * @type {eras-table-column[]} Array of `eras-table-column` elements
+       */
+      columns: {
+        type: Array,
+        value: []
+      },
+
+      /**
+       * Options to choose from when selecting a column to work with.
+       * @type {{ property:String, label:String }[]}
+       */
+      _options: {
+        type: Array,
+        value: []
+      },
+
+      /**
+       * The property that will be used when a column is selected.
+       * @type {String}
+       */
+      _property: {
+        type: String,
+        value: null
+      },
+
+      /**
+       * Temporarily holds information about the filters whilst
+       * the user is editing it. Copied from `filters` when 
+       * editing begins, and back again when finished
+       */
+      _temp: {
+        type: Array,
+        value: []
+      },
+
+      /**
+       * Override this property to specify the name of the property
+       * that will contain the criteria (e.g. `filters` / `sort`)
+       */
+      _criteriaProperty: String,
+
+      /**
+       * Override this property to specify which property should
+       * be checked on the columns to determine whether they should
+       * be included (e.g. canSort/canFilter)
+       */
+      _columnCheckProperty: {
+        type: String,
+        readOnly: true
+      }
+    },
+
+    /** 
+     * Override this function to reset parameters. 
+     * Elements overriding this function should also 
+     * call this version.
+     */
+    _reset: function () {
+      console.log('base _reset call');
+      this._property = null;
+      this.$.optionsMenu.removeAttribute('invalid');
+      this._refreshOptions();
+    },
+
+    /**
+		 * Refreshes the options for column selection. 
+		 * Includes all columns where the property specified in `_columnCheckProperty` is `true` and they 
+		 * aren't already in `_temp`.     
+		 */
+    _refreshOptions: function () {
+      var el = this;
+
+      this._options =
+        this.columns
+          // only include columns where `canFilter`/`canSort` are true
+          .filter(function (c) {
+            return c[el._columnCheckProperty];
+          })
+          // and aren't already selected
+          .filter(function (c) {
+            return el._temp.filter(function (s) {
+              return s.property == c.property;
+            }).length == 0;
+          })
+          // extract into object
+          .map(function (c) {
+            return {
+              property: c.property,
+              label: c.label
+            };
+          });
+    },
+
+    /**
+     * Opens the popup window
+     */
+    open: function () {
+      this._temp = JSON.parse(JSON.stringify(this[this._criteriaProperty]));
+      this._reset();
+      this.$.popup.open();
+    },
+
+    /**
+     * Closes the popup window (really only used for tests)
+     */
+    _close: function () {
+      this.$.popup.close();
+    },
+
+    /**
+     * Override this function to provide validation
+     * @return {Boolean} always returns `true`
+     */
+    _validate: function () {
+      return true;
+    },
+
+    /**
+		 * Adds a new sort criteria to `_temp` and clears the input
+		 */
+    _add: function () {
+      if (!this._validate())
+        return;
+
+      this.push('_temp', this._getParams());
+      this._reset();
+    },
+
+    /**
+     * Override this with a function that returns an object containing
+     * the params to add to the criteria.
+     * @return {Object}
+     */
+    _getParams: function () {
+      return {};
+    }
+  }
+</script>
