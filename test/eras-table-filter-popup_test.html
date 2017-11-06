@@ -11,6 +11,7 @@
   <script src='../../web-component-tester/browser.js'></script>
 
   <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+  <script src='../bower_components/moment/moment.js'></script>
   <link rel='import' href='../eras-table-filter-popup.html'>
 </head>
 
@@ -24,13 +25,182 @@
   <script>
     suite('eras-table-filter-popup', function () {
       var el;
+      var columns;
+
+      suiteSetup(function () {
+        columns = [];
+        for (var i = 1; i <= 5; i++) {
+          var col = document.createElement('eras-table-column');
+          col.canFilter = i <= 4;
+          col.property = 'property-' + i;
+          col.label = 'Column ' + i;
+
+          switch (i) {
+            case 2:
+              col.type = 'bool';
+              break;
+
+            case 3:
+              col.type = 'date';
+              break;
+
+            case 3:
+              col.type = 'enum';
+              col.allowedValues = ['A', 'B', 'C'];
+              break;
+
+            default:
+              col.type = 'string';
+              break;
+          }
+
+          columns.push(col);
+        }
+      });
 
       setup(function () {
         el = fixture('eras-table-filter-popup-fixture');
+        el.columns = columns;
       });
 
-      test('instantiation', function () {
-        assert.equal(el.is, 'eras-table-filter-popup');
+      suite('setup', function () {
+        setup(function () { });
+        teardown(function () { });
+
+        test('instantiation', function (done) {
+          assert.equal(el.is, 'eras-table-filter-popup');
+          done();
+        });
+
+        test('columns', function (done) {
+          assert.equal(columns.length, el.columns.length, 'expected all the columns to have been added to the element');
+          done();
+        });
+      });
+
+      suite('interactions', function () {
+        test('open/close', function (done) {
+          el.open();
+          assert(el.$.popup.opened, 'expected the popup to be open');
+          el._close();
+          assert(!el.$.popup.opened, 'expected the popup to be closed');
+          done();
+        });
+
+        test('options filter', function (done) {
+          el.open();
+          assert.equal(4, el._options.length, 'expected only 3 filterable options, got ' + el._options.length);
+          done();
+        });
+
+        suite('select', function () {
+          var selectTest = function (index) {
+            return function (done) {
+              // var prop = columns[index].property;
+              var col = columns[index];
+              flush(function () {
+                el.open();
+                MockInteractions.tap(el.$.optionsMenu);
+                flush(function () {
+                  el.$.optionsMenu.querySelector('paper-item[value="' + col.property + '"]').click();
+                  assert.equal(col.property, el._property, 'expected `' + col.property + '` to be selected not `' + el._property + '`');
+                  assert.equal(col.type, el._propertyType, 'expected `' + col.type + '` to be the type not `' + el._propertyType + '`');
+                  el._close();
+                  done();
+                });
+              });
+            }
+          }
+
+          for (var i = 0; i < 4; i++)
+            test('column ' + (i + 1), selectTest(i));
+        });
+
+        suite('add', function () {
+          test('string', function (done) {
+            var property = 'property-1';
+            var value = 'some-value';
+            var expected = [{ property: property, value: value }];
+
+            el.open();
+            MockInteractions.tap(el.$.optionsMenu);
+
+            flush(function () {
+              MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+              el.$.stringInput.value = value;
+              MockInteractions.tap(el.$.addButton);
+
+              assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+              done();
+            });
+          });          
+
+          suite('bool', function () {
+            var dataTest = function (value) {
+              return function (done) {
+                var property = 'property-2';
+                var expected = [{ property: property, value: value }];
+
+                el.open();
+                MockInteractions.tap(el.$.optionsMenu);
+
+                flush(function () {
+                  MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+
+                  if (value)
+                    MockInteractions.tap(el.$.boolInput); // default is unchecked
+
+                  MockInteractions.tap(el.$.addButton);
+
+                  assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+                  done();
+                });
+              };
+            };
+
+            var data = [true, false];
+
+            for (var i = 0; i < data.length; i++)
+              test(data[i].toString(), dataTest(data[i]));
+          });
+
+          suite('date', function () {
+            var dataTest = function (from, to) {
+              return function (done) {
+                var property = 'property-3';
+                var value = {
+                  from: from,
+                  to: to
+                };
+                var expected = [{ property: property, value: value }];
+
+                el.open();
+                MockInteractions.tap(el.$.optionsMenu);
+ 
+                flush(function () {
+                  MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+                  el.$.dateInput.from = value.from;
+                  el.$.dateInput.to = value.to;
+                  MockInteractions.tap(el.$.addButton);
+
+                  assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+                  done();
+                });
+              };
+            };
+
+            var f = 'YYYY-MM-DD hh:mm A';
+
+            var data = [
+              { name: 'both', from: moment.utc().subtract(7, 'days').format(f), to: moment.utc().add(7, 'days').format(f) },
+              { name: 'from only', to: moment.utc().add(7, 'days').format(f) },
+              { name: 'to only', from: moment.utc().subtract(7, 'days').format(f) }
+            ];
+
+            for (var i = 0; i < data.length; i++)
+              test(data[i].name, dataTest(data[i].from, data[i].to));
+          });
+        });
       });
     });
 

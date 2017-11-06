@@ -85,27 +85,27 @@
           assert.equal(3, el._options.length, 'expected only 3 sortable options, got ' + el._options.length);
           done();
         });
-      });
 
-      suite('select', function () {
-        var selectTest = function (index) {
-          return function (done) {
-            var prop = columns[index].property;
-            flush(function () {
-              el.open();
-              el.$.optionsMenu.click();
+        suite('select', function () {
+          var selectTest = function (index) {
+            return function (done) {
+              var prop = columns[index].property;
               flush(function () {
-                el.$.optionsMenu.querySelector('paper-item[value="' + prop + '"]').click();
-                assert.equal(prop, el._property, 'expected `' + prop + '` to be selected not `' + el._property + '`');
-                el._close();
-                done();
+                el.open();
+                el.$.optionsMenu.click();
+                flush(function () {
+                  el.$.optionsMenu.querySelector('paper-item[value="' + prop + '"]').click();
+                  assert.equal(prop, el._property, 'expected `' + prop + '` to be selected not `' + el._property + '`');
+                  el._close();
+                  done();
+                });
               });
-            });
+            }
           }
-        }
 
-        for (var i = 0; i < 3; i++)
-          test('column ' + (i + 1), selectTest(i));
+          for (var i = 0; i < 3; i++)
+            test('column ' + (i + 1), selectTest(i));
+        });
       });
 
       test('direction switch', function (done) {
