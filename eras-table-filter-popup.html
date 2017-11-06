@@ -37,7 +37,7 @@
         width: 100%
       }
 
-      #input-container > .input {
+      #input-container>.input {
         display: none;
       }
 
@@ -71,19 +71,20 @@
 
         <div id='input-container' data-type$='{{_propertyType}}'>
 
-            <paper-input id='stringInput' class='input' label='Text to search for' error-message='You must enter something' disabled$='{{!_property}}'></paper-input>
+          <paper-input id='stringInput' class='input' label='Text to search for' error-message='You must enter something' disabled$='{{!_property}}'></paper-input>
 
-            <paper-checkbox id='boolInput' class='input' disabled$='{{!_property}}'></paper-checkbox>
-            
-            <eras-input-daterange id='dateInput' class='input' icon='' label='Enter a date range' from='' to='' error-message='You must provide a date range' disabled$='{{!_property}}'></eras-input-daterange>
+          <paper-checkbox id='boolInput' class='input' disabled$='{{!_property}}'></paper-checkbox>
 
-            <paper-dropdown-menu id='enumInput' class='input' label='Value to filter for' error-message='You must select a value' disabled$='{{!_property}}'>
-              <paper-menu class='dropdown-content' attr-for-selected='value' selected='{{_enum}}'>
-                <template is='dom-repeat' items='{{_allowedEnumValues}}' as='option'>
-                  <paper-item value$='{{option}}'>{{option}}</paper-item>
-                </template>
-              </paper-menu>
-            </paper-dropdown-menu>
+          <eras-input-daterange id='dateInput' class='input' icon='' label='Enter a date range' from='' to='' error-message='You must provide a date range'
+            disabled$='{{!_property}}'></eras-input-daterange>
+
+          <paper-dropdown-menu id='enumInput' class='input' label='Value to filter for' error-message='You must select a value' disabled$='{{!_property}}'>
+            <paper-menu class='dropdown-content' attr-for-selected='value' selected='{{_enum}}'>
+              <template is='dom-repeat' items='{{_allowedEnumValues}}' as='option'>
+                <paper-item value$='{{option}}'>{{option}}</paper-item>
+              </template>
+            </paper-menu>
+          </paper-dropdown-menu>
 
         </div>
 
@@ -214,6 +215,7 @@
         return a === b;
       },
 
+      /** Validate the selection before adding it to the list of criteria */
       _validate: function () {
         if (!this._property) {
           this.$.optionsMenu.setAttribute('invalid', '');
@@ -280,24 +282,23 @@
         var value;
         switch (this._propertyType) {
           case 'string':
-            value = this.querySelector('#stringInput').value;
+            value = this.$.stringInput.value;
             break;
 
           case 'bool':
-            value = this.querySelector('#boolInput').checked;
+            value = this.$.boolInput.checked;
             break;
 
           case 'date':
-            var input = this.querySelector('#dateInput');
-            value = input.from + ':' + input.to;
+            var input = this.$.dateInput;
+            value = { from: input.from, to: input.to };
             break;
 
           case 'enum':
-            value = this.querySelector('#enumInput').selectedItem.value;
+            value = this.$.enumInput.selectedItem.value;
             break;
         }
 
-        console.log('_getParams', value);
         return { property: this._property, value: value };
       },
     });
