@@ -44,7 +44,7 @@
               col.type = 'date';
               break;
 
-            case 3:
+            case 4:
               col.type = 'enum';
               col.allowedValues = ['A', 'B', 'C'];
               break;
@@ -96,7 +96,6 @@
         suite('select', function () {
           var selectTest = function (index) {
             return function (done) {
-              // var prop = columns[index].property;
               var col = columns[index];
               flush(function () {
                 el.open();
@@ -117,23 +116,39 @@
         });
 
         suite('add', function () {
-          test('string', function (done) {
-            var property = 'property-1';
-            var value = 'some-value';
-            var expected = [{ property: property, value: value }];
+          suite('string', function () {
+            test('with value', function (done) {
+              var property = 'property-1';
+              var value = 'some-value';
+              var expected = [{ property: property, value: value }];
 
-            el.open();
-            MockInteractions.tap(el.$.optionsMenu);
+              el.open();
+              MockInteractions.tap(el.$.optionsMenu);
 
-            flush(function () {
-              MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
-              el.$.stringInput.value = value;
-              MockInteractions.tap(el.$.addButton);
+              flush(function () {
+                MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+                el.$.stringInput.value = value;
+                MockInteractions.tap(el.$.addButton);
 
-              assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
-              done();
+                assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+                done();
+              });
             });
-          });          
+
+            test('no value', function (done) {
+              var property = 'property-1';
+
+              el.open();
+              MockInteractions.tap(el.$.optionsMenu);
+
+              flush(function () {
+                MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+                MockInteractions.tap(el.$.addButton);
+                assert(el.$.stringInput.invalid, 'expected the `#stringInput` to be invalid');
+                done();
+              });
+            });
+          });
 
           suite('bool', function () {
             var dataTest = function (value) {
@@ -165,7 +180,7 @@
           });
 
           suite('date', function () {
-            var dataTest = function (from, to) {
+            var dataTest = function (from, to, valid) {
               return function (done) {
                 var property = 'property-3';
                 var value = {
@@ -176,14 +191,19 @@
 
                 el.open();
                 MockInteractions.tap(el.$.optionsMenu);
- 
+
                 flush(function () {
                   MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
                   el.$.dateInput.from = value.from;
                   el.$.dateInput.to = value.to;
                   MockInteractions.tap(el.$.addButton);
 
-                  assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+                  assert.equal(!valid, el.$.dateInput.invalid, 'expected `#dateInput` to be ' + (valid ? 'valid' : 'invalid'));
+
+                  // don't bother testing if invalid expected as it won't add invalid criteria
+                  if (valid)
+                    assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+
                   done();
                 });
               };
@@ -192,13 +212,56 @@
             var f = 'YYYY-MM-DD hh:mm A';
 
             var data = [
-              { name: 'both', from: moment.utc().subtract(7, 'days').format(f), to: moment.utc().add(7, 'days').format(f) },
-              { name: 'from only', to: moment.utc().add(7, 'days').format(f) },
-              { name: 'to only', from: moment.utc().subtract(7, 'days').format(f) }
+              { name: 'both', from: moment.utc().subtract(7, 'days').format(f), to: moment.utc().add(7, 'days').format(f), valid: true },
+              { name: 'from only', to: moment.utc().add(7, 'days').format(f), valid: true },
+              { name: 'to only', from: moment.utc().subtract(7, 'days').format(f), valid: true },
+              { name: 'neither', valid: false }
             ];
 
             for (var i = 0; i < data.length; i++)
-              test(data[i].name, dataTest(data[i].from, data[i].to));
+              test(data[i].name, dataTest(data[i].from, data[i].to, data[i].valid));
+          });
+
+          suite('enum', function () {
+            test('with selection', function (done) {
+              var property = 'property-4';
+
+              el.open();
+              MockInteractions.tap(el.$.optionsMenu);
+
+              flush(function () {
+                MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+
+                flush(function () {
+                  MockInteractions.tap(el.$.enumInput);
+                  var option = el.$.enumInput.querySelectorAll('paper-item')[1];
+                  MockInteractions.tap(option);
+                  MockInteractions.tap(el.$.addButton);
+
+                  var expected = [{ property: property, value: option.getAttribute('value') }];
+                  assert.deepEqual(expected, el._temp, 'expected `_temp` to be `' + JSON.stringify(expected) + '` not `' + JSON.stringify(el._temp) + '`');
+
+                  done();
+                });
+              });
+            });
+
+            test('no selection', function (done) {
+              var property = 'property-4';
+
+              el.open();
+              MockInteractions.tap(el.$.optionsMenu);
+
+              flush(function () {
+                MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
+
+                flush(function () {                  
+                  MockInteractions.tap(el.$.addButton);
+                  assert(el.$.enumInput.invalid, 'expected the `#enumInput` to be invalid');
+                  done();
+                });
+              });
+            });
           });
         });
       });
