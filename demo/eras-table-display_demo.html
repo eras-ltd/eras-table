@@ -29,9 +29,9 @@
 		<demo-snippet>
 			<template is='dom-bind' id='app'>
 				<eras-table-display id='table' heading='My Table' data='{{data}}' page='{{page}}' select='multi' id-property='prop-1' selected-ids='{{selectedIds}}' sort='{{sort}}'>
-					<eras-table-column label='Col 1' property='prop-1' format='{{format1}}' can-sort></eras-table-column>
-					<eras-table-column label='Col 2' property='prop-2' can-sort></eras-table-column>
-					<eras-table-column label='Col 3' property='prop-3' format='{{format2}}' can-sort></eras-table-column>
+					<eras-table-column label='Col 1' property='prop-1' format='{{format1}}' can-sort can-filter></eras-table-column>
+					<eras-table-column label='Col 2' property='prop-2' can-sort can-filter></eras-table-column>
+					<eras-table-column label='Col 3' property='prop-3' format='{{format2}}' can-sort can-filter></eras-table-column>
 					<paper-icon-button slot="single-select-actions" icon="create" on-tap="goToEdit"></paper-icon-button>
 					<paper-icon-button slot="multi-select-actions" icon="clear" on-tap="clearSelection"></paper-icon-button>
 				</eras-table-display>

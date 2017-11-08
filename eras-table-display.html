@@ -12,6 +12,7 @@
 <link rel='import' href='eras-table-column.html'>
 <link rel='import' href='eras-table-classes.html'>
 <link rel='import' href='eras-table-sort-popup.html'>
+<link rel='import' href='eras-table-filter-popup.html'>
 <!--
 `eras-table-display` 
 
@@ -257,6 +258,8 @@ Property|Description|Default
 
 		<eras-table-sort-popup id='sortPopup' sort='{{sort}}' columns='{{columns}}'></eras-table-sort-popup>
 
+		<eras-table-filter-popup id='filterPopup' filters='{{filters}}' columns='{{columns}}'></eras-table-filter-popup>
+
 	</template>
 
 	<script>
@@ -440,7 +443,7 @@ Property|Description|Default
 			},
 
 			/**
-			 * Clears all ids from `selectedIds` and unticks all checkboxes.
+			 * Clears all ids from `selectedIds` and un-ticks all checkboxes.
 			 */
 			clearSelection: function () {
 				this.selectedIds = [];
@@ -758,6 +761,13 @@ Property|Description|Default
 			},
 
 			/**
+			 * Show the "Filter" popup dialog
+			 */
+			_showFilter: function () {
+				this.$.filterPopup.open();
+			},
+
+			/**
 			 * Updates the icons in the headers cells that show sorting and filtering.
 			 * @param {{ property:String, direction:String }[]}
 			 */
@@ -788,7 +798,7 @@ Property|Description|Default
 			 */
 
 			/**
-			 * Fired when a new option is chosen from the per-page selectlist
+			 * Fired when a new option is chosen from the per-page select list
 			 * @event per-page-change
 			 * @param {{size:Number}} detail
 			 */
