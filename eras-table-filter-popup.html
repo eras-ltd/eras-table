@@ -56,10 +56,24 @@
       #input-container[data-type='enum'] #enumInput {
         display: block;
       }
+
+      #popup paper-dialog-scrollable {
+        min-height: 160px;
+      }
+
+      #popup paper-dialog-scrollable .label,
+      #popup paper-dialog-scrollable .value {
+        text-decoration: underline;
+      }
+
+      #criteria-list .iron-selected {
+        font-weight: inherit !important;
+      }
     </style>
 
     <paper-dialog id='popup' modal>
       <h2>Filter</h2>
+
       <div class='layout horizontal center'>
         <paper-dropdown-menu id='optionsMenu' label='Column to filter by' error-message='You must select a columns to search'>
           <paper-menu class='dropdown-content' selected='{{_property}}' attr-for-selected='value'>
@@ -91,6 +105,56 @@
         <div class='flex'></div>
         <paper-icon-button id='addButton' class='self-end' icon='add' on-tap='_add'></paper-icon-button>
       </div>
+
+      <paper-dialog-scrollable>
+        <paper-listbox id='criteria-list'>
+          <template is='dom-repeat' items='{{_temp}}'>
+            <paper-item class='layout horizontal center'>
+              <div class='flex'>
+
+                <span class='label'>{{_getLabel(item.property, columns)}}</span>
+
+                <template is='dom-if' if='{{_typeIs(item.property, "string")}}'>
+                  <span class='description'>contains</span>
+                  <span class='value'>{{item.value}}</span>
+                </template>
+
+                <template is='dom-if' if='{{_typeIs(item.property, "bool")}}'>
+                  <span class='description'>is</span>
+                  <span class='value'>{{item.value}}</span>
+                </template>
+
+                <template is='dom-if' if='{{_typeIs(item.property, "date")}}'>
+                  <template is='dom-if' if='{{_dateDisplay(item.value, "between")}}'>
+                    <span class='description'>is between</span>
+                    <span class='value'>{{_formatDate(item.value.from)}}</span>
+                    <span class='description'>and</span>
+                    <span class='value'>{{_formatDate(item.value.to)}}</span>
+                  </template>
+                  <template is='dom-if' if='{{_dateDisplay(item.value, "on")}}'>
+                    <span class='description'>is on</span>
+                    <span class='value'>{{_formatDate(item.value.from)}}</span>
+                  </template>
+                  <template is='dom-if' if='{{_dateDisplay(item.value, "after")}}'>
+                    <span class='description'>is after</span>
+                    <span class='value'>{{_formatDate(item.value.from)}}</span>
+                  </template>
+                  <template is='dom-if' if='{{_dateDisplay(item.value, "before")}}'>
+                    <span class='description'>is before</span>
+                    <span class='value'>{{_formatDate(item.value.to)}}</span>
+                  </template>
+                </template>
+
+                <template is='dom-if' if='{{_typeIs(item.property, "enum")}}'>
+                  <span class='description'>equals</span>
+                  <span class='value'>{{item.value}}</span>
+                </template>
+              </div>
+              <paper-icon-button class='remove' icon='delete' on-tap='_remove' data-index$='{{index}}'></paper-icon-button>
+            </paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dialog-scrollable>
 
       <div class='buttons'>
         <paper-icon-button dialog-dismiss icon='close'></paper-icon-button>
@@ -215,6 +279,37 @@
         return a === b;
       },
 
+      /**
+       * Used by `dom-if`s to check how to display a criterion
+       * @param {String} property
+       * @param {String} expectedType
+       * @return {Boolean}
+       */
+      _typeIs: function (property, expectedType) {
+        var actualType = this._computePropertyType(property);
+        return actualType == expectedType;
+      },
+
+      /**
+       * Used by `dom-if`s to check how to display a date range
+       * @param {{ from:String, to:String }} value
+       * @param {String} expected both | from | to | neither
+       * @return {Boolean}
+       */
+      _dateDisplay: function (value, expected) {
+        switch (expected) {
+          case 'between': return value.from && value.to && value.from != value.to;
+          case 'on': return value.from && value.to && value.from == value.to;
+          case 'after': return value.from && !value.to;
+          case 'before': return !value.from && value.to;
+        }
+      },
+
+      /** Formats a `YYYY-MM-DD` date as `Do MMM YYYY` for display */
+      _formatDate: function (date) {
+        return moment(date, 'YYYY-MM-DD').format('Do MMM YYYY');
+      },
+
       /** Validate the selection before adding it to the list of criteria */
       _validate: function () {
         if (!this._property) {
@@ -300,7 +395,7 @@
         }
 
         return { property: this._property, value: value };
-      },
+      }
     });
   </script>
 </dom-module>
