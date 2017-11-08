@@ -156,6 +156,14 @@
     },
 
     /**
+     * Copies the `_temp` property into the property specified by `_criteriaProperty`
+     * (`sort` or `filters`)
+     */
+    _update: function(){
+      this[this._criteriaProperty] = JSON.parse(JSON.stringify(this._temp));
+    },
+
+    /**
 		 * Gets the label for the column specified by the supplied property
 		 * @param {String} property Name of the property to find the label for 
 		 * @param {eras-table-column[]} columns Array of `eras-table-column` elements from `columns`

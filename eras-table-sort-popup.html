@@ -178,16 +178,6 @@
        */
       _getParams: function () {
         return { property: this._property, direction: this._direction };
-      },
-
-			/**
-			 * Copies the `_temp` property into the `sort` property 
-			 * when the sort popup is confirmed, then fires a `sort-change`
-			 * event.
-			 */
-      _update: function () {
-        this.sort = JSON.parse(JSON.stringify(this._temp));
-        // this.fire('sort-change', { sort: this.sort });
       }
     });
   </script>
