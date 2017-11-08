@@ -307,6 +307,18 @@ Property|Description|Default
 				},
 
 				/**
+				 * Array of objects describing how the data is filtered. Fired `filter-change` when changed.
+				 * - property: the name of the property to sort by
+				 * - value: object containing value to filter on
+				 * @type {{ property:String, value:Object }[]}
+				 */
+				filters: {
+					type: Array,
+					value: [],
+					observer: '_filterChanged'
+				},
+
+				/**
 				 * Specifies whether to display the loading UI (show the loading bar and grey out table contents).
 				 * @type {Boolean}
 				 */
@@ -544,7 +556,7 @@ Property|Description|Default
 			 * headers
 			 */
 			_headersChanged: function () {
-				this._refreshHeaderIcons(this.sort);
+				this._refreshHeaderIcons();
 			},
 
 			/**
@@ -771,7 +783,7 @@ Property|Description|Default
 			 * Updates the icons in the headers cells that show sorting and filtering.
 			 * @param {{ property:String, direction:String }[]}
 			 */
-			_refreshHeaderIcons: function (sort) {
+			_refreshHeaderIcons: function () {
 				var headers = this.querySelectorAll('div.cell.head.label');
 				if (!headers || headers.length == 0)
 					return;
@@ -779,16 +791,24 @@ Property|Description|Default
 				for (var i = 0; i < headers.length; i++)
 					headers[i].removeAttribute('data-direction');
 
-				for (var i = 0; i < sort.length; i++)
-					this.$$('div.cell.head.label[data-property="' + sort[i].property + '"]').setAttribute('data-direction', sort[i].direction);
+				for (var i = 0; i < this.sort.length; i++)
+					this.$$('div.cell.head.label[data-property="' + this.sort[i].property + '"]').setAttribute('data-direction', this.sort[i].direction);
 			},
 
 			/**
 			 * Fires the `sort-change` event in response to `sort` being changed.
 			 */
 			_sortChanged: function (sort) {
-				this._refreshHeaderIcons(sort);
+				this._refreshHeaderIcons();
 				this.fire('sort-change', { sort: sort });
+			},
+
+			/**
+			 * Fires the `filter-change` event in response to `filter` being changed.
+			 */
+			 _filterChanged: function (filters) {
+				this._refreshHeaderIcons();
+				this.fire('filter-change', { filters: filters });
 			},
 
 			/**
@@ -813,6 +833,12 @@ Property|Description|Default
 			 * Fired when the sort criteria are changed
 			 * @event sort-change
 			 * @param {{ sort: { property:String, direction:String }[] }} detail
+			 */
+
+			/**
+			 * Fired when the filter criteria are changed
+			 * @event filter-change
+			 * @param {{ filters: { property:String, value:Object }[] }} detail
 			 */
 		});
 	</script>
