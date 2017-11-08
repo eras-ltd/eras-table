@@ -150,21 +150,9 @@
       ],
 
       /** Resets all the parameters */
-      _reset: function() {
+      _reset: function () {
         this._direction = 'asc';
         Polymer.ErasTablePopupBehavior._reset.call(this);
-      },    
-
-      /**
-			 * Gets the label for the column specified by the supplied property
-			 * @param {String} property Name of the property to find the label for 
-			 * @param {eras-table-column[]} columns Array of `eras-table-column` elements from `columns`
-			 * @return {String} Description of the sorting of a single property
-			 */
-      _getLabel: function (property, columns) {
-        if (!columns || columns.length == 0)
-          return;
-        return columns.filter(function (c) { return c.property == property; })[0].label;
       },
 
 			/**
@@ -188,17 +176,8 @@
        * to the collection.
        * @return {{ property: String, direction: String }}
        */
-      _getParams: function() {
+      _getParams: function () {
         return { property: this._property, direction: this._direction };
-      },
-
-			/**
-			 * Removes a sort criterion from `_temp`
-			 */
-      _remove: function (e) {
-        var index = Polymer.dom(e).localTarget.dataIndex;
-        this.splice('_temp', index, 1);
-        this._refreshOptions();
       },
 
 			/**
