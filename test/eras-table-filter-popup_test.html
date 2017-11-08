@@ -61,6 +61,17 @@
       setup(function () {
         el = fixture('eras-table-filter-popup-fixture');
         el.columns = columns;
+        fire = sinon.spy(el, 'fire');
+        add = sinon.spy(el, '_add');
+        update = sinon.spy(el, '_update');
+        remove = sinon.spy(el, '_remove');
+      });
+
+      teardown(function () {
+        fire.restore();
+        add.restore();
+        update.restore();
+        remove.restore();
       });
 
       suite('setup', function () {
@@ -91,6 +102,46 @@
           el.open();
           assert.equal(4, el._options.length, 'expected only 3 filterable options, got ' + el._options.length);
           done();
+        });
+
+        test('update', function (done) {
+          flush(function () {
+            el.open();
+            el._temp = [
+              { property: columns[0].property, value: 'some-value' },
+              { property: columns[1].property, value: true },
+            ];
+            el.$$('.buttons>paper-icon-button[dialog-confirm]').click();
+
+            assert(update.calledOnce, 'expected `_update` to be called once');
+            assert.equal(2, el.filters.length, 'expected 2 filter criteria not ' + el.filters.length);
+            done();
+          });
+        });
+
+        test('remove', function (done) {
+          flush(function () {
+            el.open();
+            el._temp = [
+              { property: columns[0].property, value: 'some-value' },
+              { property: columns[1].property, value: true },
+              { property: columns[3].property, value: 'B' },
+            ];
+
+            flush(function () {
+              for (var i = 0; i < 3; i++) {
+                el.$$('paper-item.filter-item paper-icon-button.remove').click();
+                var expected = 3 - (i + 1);
+                assert.equal(expected, el._temp.length, 'expected ' + expected + ' criteria to be removed after ' + (i + 1) + 'clicks,  but found ' + el._temp.length);
+              }
+
+              assert(remove.calledThrice, 'expected `_remove` to be called 3x');
+              assert.equal(0, el._temp.length, 'expected all criteria to be removed but found ' + el._temp.length);
+
+              el._close();
+              done();
+            });
+          });
         });
 
         suite('select', function () {
@@ -255,7 +306,7 @@
               flush(function () {
                 MockInteractions.tap(el.$.optionsMenu.querySelector('paper-item[value="' + property + '"]'));
 
-                flush(function () {                  
+                flush(function () {
                   MockInteractions.tap(el.$.addButton);
                   assert(el.$.enumInput.invalid, 'expected the `#enumInput` to be invalid');
                   done();

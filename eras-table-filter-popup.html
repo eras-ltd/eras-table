@@ -66,7 +66,7 @@
         text-decoration: underline;
       }
 
-      #criteria-list .iron-selected {
+      .filter-item .iron-selected {
         font-weight: inherit !important;
       }
     </style>
@@ -107,9 +107,9 @@
       </div>
 
       <paper-dialog-scrollable>
-        <paper-listbox id='criteria-list'>
+        <paper-listbox>
           <template is='dom-repeat' items='{{_temp}}'>
-            <paper-item class='layout horizontal center'>
+            <paper-item class='layout horizontal center filter-item'>
               <div class='flex'>
 
                 <span class='label'>{{_getLabel(item.property, columns)}}</span>

@@ -28,8 +28,8 @@
       <template is='dom-bind' id='app'>
         <eras-table-filter-popup id='popup' columns='{{columns}}' filters='{{filters}}'></eras-table-filter-popup>
         <paper-button on-tap='open' raised>Open</paper-button>
-        <template is='dom-repeat' items='{{sort}}'>
-          <paper-item>{{item.property}} - {{item.direction}}</paper-item>
+        <template is='dom-repeat' items='{{filters}}'>
+          <paper-item>{{item.property}} - {{item.value}}</paper-item>
         </template>
       </template>
       <script>
