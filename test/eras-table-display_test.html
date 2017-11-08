@@ -266,7 +266,7 @@
               flush(function () {
                 var item = menu.querySelectorAll('paper-item')[index];
 
-                // programatically clicking the `paper-item` causes an error
+                // programmatically clicking the `paper-item` causes an error
                 // deep in polymer that I can't get to the bottom of. 
                 // manually forcing the menu to fire `iron-select` skips this step;
                 // I am ok with this because it works in practice and it is 
@@ -483,7 +483,7 @@
               assert.equal(el.data.length, spy.callCount, 'selection-change should have been fired ' + el.data.length + ' times');
               assert.equal(0, selected.length, 'expected none of the checkboxes to be checked but found ' + selected.length);
               assert(ids.every(function (e) { return el.selectedIds.indexOf(e) < 0; }), 'expected no ids for visible rows (' + ids + ') to be in selectedIds (' + el.selectedIds + ')');
-              assert(!multi.checked, 'expected the multiselect checkbox to be unticked');
+              assert(!multi.checked, 'expected the multiselect checkbox to be un-ticked');
               done();
             });
           });
