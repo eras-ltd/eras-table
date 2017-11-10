@@ -1,0 +1,16 @@
+{
+  "button-sort-tooltip": "Sort data",
+  "button-filter-tooltip": "Filter data",
+  "table-selected-item-count": "{0} Items Selected",
+  "table-rows": "Rows",
+  "table-page-info": "{0}-{1} of {2}",
+  "table-filter-header": "Filter Data",
+  "table-filter-description-contains": "<u>{0}</u> contains <u>{1}</u>",
+  "table-filter-description-equals": "<u>{0}</u> equals <u>{1}</u>",
+  "table-filter-description-is": "<u>{0}</u> is <u>{1}</u>",
+  "table-filter-description-between": "<u>{0}</u> is between <u>{1}</u> and <u>{2}</u>",
+  "table-filter-description-on": "<u>{0}</u> is on <u>{1}</u>",
+  "table-filter-description-after": "<u>{0}</u> is after <u>{1}</u>",
+  "table-filter-description-before": "<u>{0}</u> is before <u>{1}</u>",
+  "table-sort-header": "Sort Data"
+}

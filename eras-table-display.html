@@ -9,6 +9,7 @@
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-progress/paper-progress.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
+<link rel='import' href='../eras-i18n/eras-i18n.html'>
 <link rel='import' href='eras-table-column.html'>
 <link rel='import' href='eras-table-classes.html'>
 <link rel='import' href='eras-table-sort-popup.html'>
@@ -186,7 +187,9 @@ Property|Description|Default
 		<paper-material id='container' elevation='1'>
 			<div id='toolbar' class='layout horizontal center' current-selection-type$='{{_currentSelectionType}}'>
 				<h1 id='header'>{{heading}}</h1>
-				<h1 id='select-count'>{{selectedIds.length}} Items Selected</h1>
+				<h1 id='select-count'>
+					<eras-i18n key='table-selected-item-count' arg0='{{selectedIds.length}}'></eras-i18n>
+				</h1>
 				<div class='flex'></div>
 				<div id='single-select-actions'>
 					<slot name='single-select-actions'></slot>
@@ -196,9 +199,13 @@ Property|Description|Default
 				</div>
 				<div>
 					<paper-icon-button id='sortButton' icon='swap-vert' on-tap='_showSort'></paper-icon-button>
-					<paper-tooltip for='sortButton' position='bottom'>Sort data</paper-tooltip>
+					<paper-tooltip for='sortButton' position='bottom'>
+						<eras-i18n key='button-sort-tooltip'></eras-i18n>
+					</paper-tooltip>
 					<paper-icon-button id='filterButton' icon='search' on-tap='_showFilter'></paper-icon-button>
-					<paper-tooltip for='filterButton' position='bottom'>Filter data</paper-tooltip>
+					<paper-tooltip for='filterButton' position='bottom'>
+						<eras-i18n key='button-filter-tooltip'></eras-i18n>
+					</paper-tooltip>
 				</div>
 			</div>
 			<div class='table' loading$='{{loading}}' select$='{{select}}'>
@@ -239,7 +246,9 @@ Property|Description|Default
 			</div>
 			<div id='footer' class='layout horizontal center'>
 				<div class='flex'></div>
-				<div>Rows:</div>
+				<div>
+					<eras-i18n key='table-rows'></eras-i18n>:
+				</div>
 				<div>
 					<paper-dropdown-menu id='perPageMenu' no-label-float on-iron-select='_changePerPage' vertical-align='bottom'>
 						<paper-menu class='dropdown-content' selected='{{page.size}}' attr-for-selected='data-value'>
@@ -249,7 +258,9 @@ Property|Description|Default
 						</paper-menu>
 					</paper-dropdown-menu>
 				</div>
-				<div>{{_pagingInfo.from}}-{{_pagingInfo.to}} of {{page.results}}</div>
+				<div>
+					<eras-i18n key='table-page-info' arg0='{{_pagingInfo.from}}' arg1='{{_pagingInfo.to}}' arg2='{{page.results}}'></eras-i18n>
+				</div>
 				<template is='dom-repeat' items='{{_pagingButtons}}' as='button'>
 					<paper-icon-button id='{{button.id}}' icon='{{button.icon}}' on-tap='_goToPage' data-target-page$='{{button.target}}' disabled$='{{!button.enabled}}'></paper-icon-button>
 				</template>

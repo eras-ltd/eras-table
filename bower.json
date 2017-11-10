@@ -20,7 +20,8 @@
     "paper-styles": "1",
     "paper-ripple": "PolymerElements/paper-ripple#1",
     "paper-button": "1",
-    "eras-input": "eras-ltd/eras-input"
+    "eras-input": "eras-ltd/eras-input",
+    "eras-i18n": "eras-ltd/eras-i18n"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

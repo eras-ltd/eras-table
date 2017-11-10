@@ -15,6 +15,7 @@
   <link rel='import' href='../../paper-item/paper-item.html'>
   <link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
   <link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+  <link rel='import' href='../eras-i18n/eras-i18n-locale.html'>
   <link rel='import' href='../eras-table-sort-popup.html'>
 </head>
 
@@ -26,6 +27,7 @@
     <h3>Sort popup demo</h3>
     <demo-snippet>
       <template is='dom-bind' id='app'>
+        <eras-i18n-locale path='locale.json'></eras-i18n-locale>
         <eras-table-sort-popup id='popup' columns='{{columns}}' sort='{{sort}}'></eras-table-sort-popup>
         <paper-button on-tap='open' raised>Open</paper-button>
         <template is='dom-repeat' items='{{sort}}'>

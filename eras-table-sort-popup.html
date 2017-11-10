@@ -12,6 +12,7 @@
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
 <link rel='import' href='../polymer-sortablejs/polymer-sortablejs.html'>
+<link rel='import' href='../eras-i18n/eras-i18n.html'>
 <link rel='import' href='eras-table-popup-behavior.html'>
 <link rel='import' href='eras-table-sort-switch.html'>
 <!--
@@ -67,9 +68,12 @@
       }
     </style>
     <paper-dialog id='popup' modal>
-      <h2>Sort</h2>
+      <h2>
+        <eras-i18n key='table-sort-header'></eras-i18n>
+      </h2>
 
       <div class='layout horizontal center'>
+        <!-- TODO: need to come up with a way to i18n things like the `label` below -->
         <paper-dropdown-menu id='optionsMenu' label='Column to sort by' error-message='You must select a column to sort by' on-selected-item-changed='_validate'>
           <paper-menu class='dropdown-content' selected='{{_property}}' attr-for-selected='value'>
             <template is='dom-repeat' items='{{_options}}' as='option'>

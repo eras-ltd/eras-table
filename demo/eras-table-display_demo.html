@@ -13,6 +13,7 @@
 	<link rel='import' href='../../paper-styles/typography.html'>
 	<link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
 	<link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+	<link rel='import' href='../../eras-i18n/eras-i18n-locale.html'>
 	<link rel='import' href='../eras-table-column.html'>
 	<link rel='import' href='../eras-table-display.html'>
 
@@ -28,6 +29,7 @@
 		<h3>Basic eras-table demo</h3>
 		<demo-snippet>
 			<template is='dom-bind' id='app'>
+				<eras-i18n-locale path='locale.json'></eras-i18n-locale>
 				<eras-table-display id='table' heading='My Table' data='{{data}}' page='{{page}}' select='multi' id-property='prop-1' selected-ids='{{selectedIds}}' sort='{{sort}}'>
 					<eras-table-column label='Col 1' property='prop-1' format='{{format1}}' can-sort can-filter></eras-table-column>
 					<eras-table-column label='Col 2' property='prop-2' can-sort can-filter></eras-table-column>
