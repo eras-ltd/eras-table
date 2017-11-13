@@ -12,6 +12,7 @@
 <link rel='import' href='../paper-menu/paper-menu.html'>
 <link rel='import' href='../paper-tooltip/paper-tooltip.html'>
 <link rel='import' href='../eras-i18n/eras-i18n.html'>
+<link rel='import' href='../eras-i18n/eras-i18n-behavior.html'>
 <link rel='import' href='../eras-input/eras-input-daterange.html'>
 <link rel='import' href='eras-table-popup-behavior.html'>
 <!--
@@ -73,7 +74,7 @@
       </h2>
 
       <div class='layout horizontal center'>
-        <paper-dropdown-menu id='optionsMenu' label='Column to filter by' error-message='You must select a columns to search'>
+        <paper-dropdown-menu id='optionsMenu' label='{{_i18n(locale,"table-filter-column-label")}}' error-message='{{_i18n(locale,"table-filter-column-error")}}'>
           <paper-menu class='dropdown-content' selected='{{_property}}' attr-for-selected='value'>
             <template is='dom-repeat' items='{{_options}}' as='option'>
               <paper-item value$='{{option.property}}'>{{option.label}}</paper-item>
@@ -83,16 +84,15 @@
 
         <div id='input-container' data-type$='{{_propertyType}}'>
 
-          <!-- TODO: i18n label -->
-          <paper-input id='stringInput' class='input' label='Text to search for' error-message='You must enter something' disabled$='{{!_property}}'></paper-input>
+          <paper-input id='stringInput' class='input' label='{{_i18n(locale, "table-filter-string-label")}}' error-message='{{_i18n(locale, "table-filter-string-error")}}'
+            disabled$='{{!_property}}'></paper-input>
 
           <paper-checkbox id='boolInput' class='input' disabled$='{{!_property}}'></paper-checkbox>
 
-          <!-- TODO: i18n label -->
-          <eras-input-daterange id='dateInput' class='input' icon='' label='Enter a date range' from='' to='' error-message='You must provide a date range'
-            disabled$='{{!_property}}'></eras-input-daterange>
+          <eras-input-daterange id='dateInput' class='input' icon='' label='{{_i18n(locale, "table-filter-date-label")}}' from='' to=''
+            error-message='{{_i18n(locale, "table-filter-date-error")}}' disabled$='{{!_property}}'></eras-input-daterange>
 
-          <paper-dropdown-menu id='enumInput' class='input' label='Value to filter for' error-message='You must select a value' disabled$='{{!_property}}'>
+          <paper-dropdown-menu id='enumInput' class='input' label='{{_i18n(locale, "table-filter-enum-label")}}' error-message='{{_i18n(locale, "table-filter-enum-error")}}' disabled$='{{!_property}}'>
             <paper-menu class='dropdown-content' attr-for-selected='value' selected='{{_enum}}'>
               <template is='dom-repeat' items='{{_allowedEnumValues}}' as='option'>
                 <paper-item value$='{{option}}'>{{option}}</paper-item>
@@ -121,7 +121,8 @@
 
                 <template is='dom-if' if='{{_typeIs(item.property, "date")}}'>
                   <template is='dom-if' if='{{_dateDisplay(item.value, "between")}}'>
-                    <eras-i18n key='table-filter-description-between' arg0='{{_getLabel(item.property, columns)}}' arg1='{{item.value.from}}' arg2='{{item.value.to}}'></eras-i18n>
+                    <eras-i18n key='table-filter-description-between' arg0='{{_getLabel(item.property, columns)}}' arg1='{{item.value.from}}'
+                      arg2='{{item.value.to}}'></eras-i18n>
                   </template>
                   <template is='dom-if' if='{{_dateDisplay(item.value, "on")}}'>
                     <eras-i18n key='table-filter-description-on' arg0='{{_getLabel(item.property, columns)}}' arg1='{{item.value.from}}'></eras-i18n>
@@ -154,6 +155,10 @@
   <script>
     Polymer({
       is: 'eras-table-filter-popup',
+      behaviors: [
+        Polymer.ErasI18nBehavior,
+        Polymer.ErasTablePopupBehavior
+      ],
       properties: {
         /**
          * Array of objects describing how the data is filtered.
@@ -207,10 +212,6 @@
          */
         _enum: String
       },
-
-      behaviors: [
-        Polymer.ErasTablePopupBehavior
-      ],
 
       /** Resets all the parameters */
       _reset: function () {

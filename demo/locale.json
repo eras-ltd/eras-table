@@ -12,5 +12,14 @@
   "table-filter-description-on": "<u>{0}</u> is on <u>{1}</u>",
   "table-filter-description-after": "<u>{0}</u> is after <u>{1}</u>",
   "table-filter-description-before": "<u>{0}</u> is before <u>{1}</u>",
-  "table-sort-header": "Sort Data"
+  "table-filter-string-label": "Text to search for",
+  "table-filter-string-error": "You must enter something",
+  "table-filter-date-label": "Enter a date range",
+  "table-filter-date-error": "You must provide a date range",
+  "table-filter-enum-label": "Value to filter for",
+  "table-filter-enum-error": "You must select a value",
+  "table-filter-column-label": "Column to filter",
+  "table-filter-column-error": "You must select a column",
+  "table-sort-header": "Sort Data",
+  "table-sort-column-label": "Column to sort by"
 }
