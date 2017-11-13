@@ -1,9 +1,12 @@
 {
+  "cancel": "Cancel",
+  "apply":"Apply",
+  "remove":"Remove",
   "button-sort-tooltip": "Sort data",
   "button-filter-tooltip": "Filter data",
   "table-selected-item-count": "{0} Items Selected",
   "table-rows": "Rows",
-  "table-page-info": "{0}-{1} of {2}",
+  "table-page-info": "{0}-{1} of {2}",  
   "table-filter-header": "Filter Data",
   "table-filter-description-contains": "<u>{0}</u> contains <u>{1}</u>",
   "table-filter-description-equals": "<u>{0}</u> equals <u>{1}</u>",
@@ -20,6 +23,10 @@
   "table-filter-enum-error": "You must select a value",
   "table-filter-column-label": "Column to filter",
   "table-filter-column-error": "You must select a column",
+  "table-filter-add-tooltip":"Add filter",
   "table-sort-header": "Sort Data",
-  "table-sort-column-label": "Column to sort by"
+  "table-sort-column-label": "Column to sort by",
+  "table-sort-direction-tooltip":"Change sort direction",
+  "table-sort-add-tooltip":"Add to sort",
+  "table-sort-reorder-handle-tooltip":"Click and drag to change order"
 }
