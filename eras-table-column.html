@@ -58,6 +58,16 @@
 					value: false
 				},
 			},
+			ready: function(){
+				this.fire('eras-table-column-ready', { column: this })
+			},
+
+			/**
+			 * If a function called `format` has been defined then use it to 
+			 * format `data`
+			 * @param {Object} data
+			 * @return {String}
+			 */
 			formatData: function (data) {
 				if (data === undefined)
 					return data;
@@ -67,6 +77,13 @@
 
 				return data;
 			}
+
+			/**
+			 * Fired by the elements `ready` call back to 
+			 * signal that it should be added to the list of columns.
+			 * @event eras-table-column-ready
+			 * @param {{column:eras-table-column}}
+			 */
 		});
 	</script>
 </dom-module>

@@ -271,6 +271,8 @@ Property|Description|Default
 
 		<eras-table-filter-popup id='filterPopup' filters='{{filters}}' columns='{{columns}}'></eras-table-filter-popup>
 
+		<slot name='columns'></slot>
+
 	</template>
 
 	<script>
@@ -290,7 +292,7 @@ Property|Description|Default
 					*/
 				columns: {
 					type: Array,
-					value: []
+					value: function () { return []; }
 				},
 
 				/**
@@ -446,12 +448,13 @@ Property|Description|Default
 			},
 
 			ready: function () {
-				this._observer = Polymer.dom(this).observeNodes(function (i) {
-					this.columns = i.addedNodes.filter(function (n) { return n.tagName === 'ERAS-TABLE-COLUMN'; });
+				this.addEventListener('eras-table-column-ready', function (e) {
+					this.push('columns', e.detail.column);
 				});
+			},
 
+			attached: function () {
 				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
-
 				this._updateMultiSelect();
 			},
 
@@ -817,7 +820,7 @@ Property|Description|Default
 			/**
 			 * Fires the `filter-change` event in response to `filter` being changed.
 			 */
-			 _filterChanged: function (filters) {
+			_filterChanged: function (filters) {
 				this._refreshHeaderIcons();
 				this.fire('filter-change', { filters: filters });
 			},

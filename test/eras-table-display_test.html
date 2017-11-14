@@ -18,9 +18,9 @@
   <test-fixture id='eras-table-display-fixture'>
     <template is='dom-template'>
       <eras-table-display data='{{data}}' page='{{page}}' id-property='prop-1' selected-ids='{{selectedIds}}' select='none'>
-        <eras-table-column property='prop-1' label='Column 1'></eras-table-column>
-        <eras-table-column property='prop-2' label='Column 2'></eras-table-column>
-        <eras-table-column property='prop-3' label='Column 3'></eras-table-column>
+        <eras-table-column slot='columns' property='prop-1' label='Column 1'></eras-table-column>
+        <eras-table-column slot='columns' property='prop-2' label='Column 2'></eras-table-column>
+        <eras-table-column slot='columns' property='prop-3' label='Column 3'></eras-table-column>
       </eras-table-display>
     </template>
   </test-fixture>
