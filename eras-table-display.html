@@ -279,10 +279,7 @@ Property|Description|Default
 		Polymer({
 			is: 'eras-table-display',
 			properties: {
-				/**
-				 * Text to be displayed above the table
-				 * @type String
-				 */
+				/** Text to be displayed above the table */
 				heading: String,
 
 				/**
@@ -332,7 +329,8 @@ Property|Description|Default
 				},
 
 				/**
-				 * Specifies whether to display the loading UI (show the loading bar and grey out table contents).
+				 * Specifies whether to display the loading UI (show the loading 
+				 * bar and grey out table contents).
 				 * @type {Boolean}
 				 */
 				loading: {
@@ -577,14 +575,14 @@ Property|Description|Default
 			 * Function for the pagination buttons to call 'on-tap'. 
 			 * checks if the button is disabled (because even when disabled the
 			 * `tap` event can be triggered by calling `.click()`) then fires
-			 * a `change-page` event.	
+			 * a `eras-table-display-change-page` event.	
 			 * @param {Object} e On tap event from pagination button
 			 */
 			_goToPage: function (e) {
 				var button = Polymer.dom(e).localTarget;
 
 				if (!button.disabled)
-					this.fire('change-page', { target: button.dataset.targetPage });
+					this.fire('eras-table-display-change-page', { target: parseInt(button.dataset.targetPage) });
 			},
 
 			/**
@@ -827,7 +825,7 @@ Property|Description|Default
 
 			/**
 			 * Fired when one of the pagination buttons is tapped
-			 * @event change-page
+			 * @event eras-table-display-change-page
 			 * @param {{target:Number}} detail
 			 */
 
