@@ -130,7 +130,7 @@
 
             flush(function () {
               for (var i = 0; i < 3; i++) {
-                el.$$('paper-item.filter-item paper-icon-button.remove').click();
+                el.$$('paper-item.filter-item paper-icon-button[id^="remove-"]').click();
                 var expected = 3 - (i + 1);
                 assert.equal(expected, el._temp.length, 'expected ' + expected + ' criteria to be removed after ' + (i + 1) + 'clicks,  but found ' + el._temp.length);
               }
