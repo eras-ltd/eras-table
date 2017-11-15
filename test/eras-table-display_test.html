@@ -138,7 +138,7 @@
           var fire;
 
           setup(function () {
-            fire = sinon.spy(el, 'fire').withArgs('change-page');
+            fire = sinon.spy(el, 'fire').withArgs('eras-table-display-change-page');
           });
 
           teardown(function () {
@@ -152,10 +152,10 @@
                 MockInteractions.tap(el.$$('#' + id));
 
                 if (enabled) {
-                  assert(fire.calledOnce, 'change-page event should have fired once');
-                  assert.deepEqual({ target: target.toString() }, fire.args[0][1], 'expected the 2nd argument of the event to be `{ target: ' + target + ' }` not ' + JSON.stringify(fire.args[0][1]));
+                  assert(fire.calledOnce, 'eras-table-display-change-page event should have fired once');
+                  assert.deepEqual({ target: target }, fire.args[0][1], 'expected the 2nd argument of the event to be `{ target: ' + target + ' }` not ' + JSON.stringify(fire.args[0][1]));
                 } else {
-                  assert(fire.notCalled, 'change-page event should not have fired');
+                  assert(fire.notCalled, 'eras-table-display-change-page event should not have fired');
                 }
 
                 done();
