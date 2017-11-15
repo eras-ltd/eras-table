@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-static tests</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+  <script src='../../web-component-tester/browser.js'></script>
+
+  <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+  <link rel='import' href='../eras-table-static.html'>
+  <link rel='import' href='../eras-table-column.html'>
+</head>
+
+<body>
+  <test-fixture id='eras-table-static-fixture'>
+    <template is='dom-template'>
+      <eras-table-static data='{{data}}' page='{{page}}'>
+        <eras-table-column slot='columns' label='Col 1' property='prop-1' format='{{format1}}' can-sort can-filter></eras-table-column>
+        <eras-table-column slot='columns' label='Col 2' property='prop-2' can-sort can-filter></eras-table-column>
+        <eras-table-column slot='columns' label='Col 3' property='prop-3' format='{{format2}}' can-sort can-filter></eras-table-column>
+      </eras-table-static>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('eras-table-static', function () {
+      var el;
+      var data;
+      var page;
+
+      setup(function () {
+        data = [];
+
+        for (var row = 0; row < 50; row++) {
+          data[row] = {};
+          for (var col = 1; col <= 3; col++) {
+            data[row]['prop-' + col] = 'd' + row + 'p' + col;
+          }
+        }
+
+        page = {
+          current: 1,
+          size: 5,
+          results: data.length
+        };
+
+        el = fixture('eras-table-static-fixture', { data: data, page: page });
+      });
+
+      test('instantiation', function (done) {
+        assert.equal(el.is, 'eras-table-static');
+        assert.equal(data.length, el.data.length, 'expected all the data (' + data.length + ') to have been passed to the table');
+        assert.equal(3, el.$.display.columns.length, 'expected 3 columns, not ' + el.$.display.columns.length);
+        done();
+      });
+
+      suite('pagination', function () {
+        test('start', function (done) {
+          assert.equal(1, el.page.current, 'expected table to be on page 1 not ' + el.page.current);
+          assert.equal('d0p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d0p1` not `' + el._dataPage[0]['prop-1'] + '`');
+          assert.equal('d4p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d0p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+          done();
+        });
+
+        test('next x 1', function (done) {
+          var next = el.$.display.querySelector('#next');
+          MockInteractions.tap(next);
+          assert.equal(2, el.page.current, 'expected table to be on page 2 not ' + el.page.current);
+          assert.equal('d5p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d5p1` not `' + el._dataPage[0]['prop-1'] + '`');
+          assert.equal('d9p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d9p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+          done();
+        });
+
+        test('next x 2', function (done) {
+          var next = el.$.display.querySelector('#next');
+          MockInteractions.tap(next);
+          flush(function () {
+            MockInteractions.tap(next);
+            assert.equal(3, el.page.current, 'expected table to be on page 3 not ' + el.page.current);
+            assert.equal('d10p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d10p1` not `' + el._dataPage[0]['prop-1'] + '`');
+            assert.equal('d14p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d14p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+            done();
+          });
+        });
+
+        test('last', function (done) {
+          var last = el.$.display.querySelector('#last');
+          MockInteractions.tap(last);
+          assert.equal(10, el.page.current, 'expected table to be on page 10 not ' + el.page.current);
+          assert.equal('d45p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d45p1` not `' + el._dataPage[0]['prop-1'] + '`');
+          assert.equal('d49p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d49p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+          done();
+        });
+
+        test('prev x 1', function (done) {
+          var last = el.$.display.querySelector('#last');
+          var prev = el.$.display.querySelector('#previous');
+          MockInteractions.tap(last);
+          flush(function () {
+            MockInteractions.tap(prev);
+            assert.equal(9, el.page.current, 'expected table to be on page 9 not ' + el.page.current);
+            assert.equal('d40p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d40p1` not `' + el._dataPage[0]['prop-1'] + '`');
+            assert.equal('d44p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d44p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+            done();
+          });
+        });
+
+        test('prev x 2', function (done) {
+          var last = el.$.display.querySelector('#last');
+          var prev = el.$.display.querySelector('#previous');
+          MockInteractions.tap(last);
+          flush(function () {
+            MockInteractions.tap(prev);
+            flush(function () {
+              MockInteractions.tap(prev);
+              assert.equal(8, el.page.current, 'expected table to be on page 8 not ' + el.page.current);
+              assert.equal('d35p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d35p1` not `' + el._dataPage[0]['prop-1'] + '`');
+              assert.equal('d39p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d39p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+              done();
+            });
+          });
+        });
+
+        test('first', function (done) {
+          var last = el.$.display.querySelector('#last');
+          var first = el.$.display.querySelector('#first');
+          MockInteractions.tap(last);
+          flush(function () {
+            MockInteractions.tap(first);
+            assert.equal(1, el.page.current, 'expected table to be on page 1 not ' + el.page.current);
+            assert.equal('d0p1', el._dataPage[0]['prop-1'], 'expected `prop-1` of the first row to be `d0p1` not `' + el._dataPage[0]['prop-1'] + '`');
+            assert.equal('d4p1', el._dataPage[el._dataPage.length - 1]['prop-1'], 'expected `prop-1` of the first row to be `d4p1` not `' + el._dataPage[el._dataPage.length - 1]['prop-1'] + '`');
+            done();
+          });
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+<link rel='import' href='../polymer/polymer.html'>
+<link rel='import' href='eras-table-display.html'>
+<!--
+`eras-table-static`
+
+@demo demo/eras-table-static_demo.html
+-->
+<dom-module id='eras-table-static'>
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <eras-table-display id='display' heading='[[heading]]' data='{{_dataPage}}' page='{{page}}' id-property='[[idProperty]]'
+      select='[[select]]'>
+      <slot name='columns'></slot>
+    </eras-table-display>
+  </template>
+  <script>
+    Polymer({
+      is: 'eras-table-static',
+      properties: {
+        /** Text to be displayed above the table */
+        heading: String,
+
+        /**
+         * Array of objects containing all the data, even that
+         * which is not on the current page.
+         * @type {Object[]}
+         */
+        data: {
+          type: Array,
+          value: []
+        },
+
+        /**
+         * Array of objects containing the subset of `data` that
+         * represents the current page. Computed from `data` and
+         * `page`.
+         * @type {Object[]}
+         */
+        _dataPage: {
+          type: Array,
+          value: [],
+          computed: '_computeDataPage(data, page)'
+        },
+
+        /**
+				 * Object containing data needed for pagination UI.
+				 * - `current`: The current page number
+				 * - `size`: The number of results to display per page
+				 * - `results`: The total number of results
+				 * @type {{ current:Number, size:Number, results:Number }}
+				 */
+        page: {
+          type: Object,
+          value: { current: 1, size: 10, results: 0 }
+        },
+
+        /**
+				 * The type of row selection to use. Allowed values are: 
+				 * - `none` 
+				 * - `single`
+				 * - `multi`
+				 * @type {String}
+				 */
+        select: {
+          type: String,
+          value: 'none'
+        },
+      },
+      ready: function () {
+        var self = this;
+
+        this.$.display.addEventListener('eras-table-display-change-page', function (e) {
+          self.page = {
+            current: e.detail.target, // update current page
+            size: self.page.size,
+            results: self.page.results
+          };
+        });
+      },
+
+      /**
+       * Computes `_dataPage` from `data` and `page`
+       * @param {Object[]} data
+       * @param {Object} page
+       * @return {Object[]}
+       */
+      _computeDataPage: function (data, page) {        
+        return data.slice((page.current - 1) * page.size, page.current * page.size);
+      }
+    });
+  </script>
+</dom-module>

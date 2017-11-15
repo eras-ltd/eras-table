@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes'>
+
+  <title>eras-table-static demo</title>
+
+  <script src='../../webcomponentsjs/webcomponents-lite.js'></script>
+
+  <link rel='import' href='../../iron-demo-helpers/demo-pages-shared-styles.html'>
+  <link rel='import' href='../../iron-demo-helpers/demo-snippet.html'>
+  <link rel='import' href='../../eras-i18n/eras-i18n-locale.html'>
+  <link rel='import' href='../eras-table-static.html'>
+
+  <style is='custom-style' include='demo-pages-shared-styles'>
+    eras-table-static {
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class='vertical-section-container centered'>
+    <h3>Basic eras-table-static demo</h3>
+    <demo-snippet>
+      <template is='dom-bind' id='app'>
+        <eras-i18n-locale path='locale.json'></eras-i18n-locale>
+        <eras-table-static id='static' heading='My Static Table' data='{{data}}' page='{{page}}' select='multi' id-property='prop-1'>
+          <eras-table-column slot='columns' label='Col 1' property='prop-1' format='{{format1}}' can-sort can-filter></eras-table-column>
+          <eras-table-column slot='columns' label='Col 2' property='prop-2' can-sort can-filter></eras-table-column>
+          <eras-table-column slot='columns' label='Col 3' property='prop-3' format='{{format2}}' can-sort can-filter></eras-table-column>
+          <paper-icon-button slot="single-select-actions" icon="create" on-tap="goToEdit"></paper-icon-button>
+          <paper-icon-button slot="multi-select-actions" icon="clear" on-tap="clearSelection"></paper-icon-button>
+        </eras-table-static>
+      </template>
+      <script>
+        var app = document.querySelector('#app');
+        app.data = [];
+
+        for (var row = 0; row < 50; row++) {
+          app.data[row] = {};
+          for (var col = 1; col <= 3; col++) {
+            app.data[row]['prop-' + col] = 'd' + row + 'p' + col;
+          }
+        }
+
+        app.page = {
+          current: 1,
+          size: 5,
+          results: app.data.length
+        };
+      </script>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>
