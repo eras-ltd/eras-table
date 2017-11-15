@@ -587,12 +587,11 @@ Property|Description|Default
 
 			/**
 			 * Function to be called when a new page size is selected.
-			 * Fires a `per-page-change` event with the requested page size.
+			 * Fires a `eras-table-display-change-per-page` event with the requested page size.
 			 * @param {Object} e On tap event from `paper-dropdown-menu`
 			 */
-			_changePerPage: function (e) {
-				// console.log('_changePerPage', e.detail.item.dataset.value );				
-				this.fire('per-page-change', { size: e.detail.item.dataset.value });
+			_changePerPage: function (e) {			
+				this.fire('eras-table-display-change-per-page', { size: e.detail.item.dataset.value });
 			},
 
 			/**
@@ -831,7 +830,7 @@ Property|Description|Default
 
 			/**
 			 * Fired when a new option is chosen from the per-page select list
-			 * @event per-page-change
+			 * @event eras-table-display-change-per-page
 			 * @param {{size:Number}} detail
 			 */
 
