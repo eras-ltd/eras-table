@@ -391,7 +391,7 @@
             });
 
             multi = el.$.head.querySelector(multiSelector);
-            spy = sinon.spy(el, 'fire').withArgs('selection-change');
+            spy = sinon.spy(el, 'fire').withArgs('eras-table-display-change-selection');
           });
 
           teardown(function () {
@@ -412,7 +412,7 @@
               MockInteractions.tap(multi);
 
               var checkboxes = el.$.body.querySelectorAll('paper-checkbox[checked]');
-              assert(spy.calledOnce, 'selection-change should have been fired once');
+              assert(spy.calledOnce, 'eras-table-display-change-selection should have been fired once');
               assert.equal(el.data.length, checkboxes.length, 'expected all ' + el.data.length + ' of the checkboxes to be checked but found ' + checkboxes.length);
               assert(ids.every(function (e) { return el.selectedIds.indexOf(e) >= 0; }), 'expected ids for all visible rows (' + ids + ') to be in selectedIds (' + el.selectedIds + ')');
               done();
@@ -426,7 +426,7 @@
                 MockInteractions.tap(checkboxes[i]);
 
               var selected = el.$.body.querySelectorAll('paper-checkbox[checked]');
-              assert.equal(el.data.length, spy.callCount, 'selection-change should have been fired ' + el.data.length + 'times');
+              assert.equal(el.data.length, spy.callCount, 'eras-table-display-change-selection should have been fired ' + el.data.length + 'times');
               assert.equal(el.data.length, selected.length, 'expected all ' + el.data.length + ' of the checkboxes to be checked but found ' + selected.length);
               assert(ids.every(function (e) { return el.selectedIds.indexOf(e) >= 0; }), 'expected ids for all visible rows (' + ids + ') to be in selectedIds (' + el.selectedIds + ')');
               assert(multi.checked, 'expected the multiselect checkbox to be ticked');
@@ -445,7 +445,7 @@
             });
 
             multi = el.$.head.querySelector(multiSelector);
-            spy = sinon.spy(el, 'fire').withArgs('selection-change');
+            spy = sinon.spy(el, 'fire').withArgs('eras-table-display-change-selection');
           });
 
           teardown(function () {
@@ -466,7 +466,7 @@
               MockInteractions.tap(multi);
 
               var checkboxes = el.$.body.querySelectorAll('paper-checkbox[checked]');
-              assert(spy.calledOnce, 'selection-change should have been fired once');
+              assert(spy.calledOnce, 'eras-table-display-change-selection should have been fired once');
               assert.equal(0, checkboxes.length, 'expected none of the checkboxes to be checked but found ' + checkboxes.length);
               assert(ids.every(function (e) { return el.selectedIds.indexOf(e) < 0; }), 'expected no ids for visible rows (' + ids + ') to be in selectedIds (' + el.selectedIds + ')');
               done();
@@ -480,7 +480,7 @@
                 MockInteractions.tap(checkboxes[i]);
 
               var selected = el.$.body.querySelectorAll('paper-checkbox[checked]');
-              assert.equal(el.data.length, spy.callCount, 'selection-change should have been fired ' + el.data.length + ' times');
+              assert.equal(el.data.length, spy.callCount, 'eras-table-display-change-selection should have been fired ' + el.data.length + ' times');
               assert.equal(0, selected.length, 'expected none of the checkboxes to be checked but found ' + selected.length);
               assert(ids.every(function (e) { return el.selectedIds.indexOf(e) < 0; }), 'expected no ids for visible rows (' + ids + ') to be in selectedIds (' + el.selectedIds + ')');
               assert(!multi.checked, 'expected the multiselect checkbox to be un-ticked');
@@ -499,7 +499,7 @@
             select: 'single'
           });
 
-          spy = sinon.spy(el, 'fire').withArgs('selection-change');
+          spy = sinon.spy(el, 'fire').withArgs('eras-table-display-change-selection');
         });
 
         teardown(function () {
@@ -514,7 +514,7 @@
             assert.equal(1, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
             var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
             assert.equal(1, checked, 'expected only one to be selected, not ' + length);
-            assert(spy.calledOnce, 'selection-change should have been fired once');
+            assert(spy.calledOnce, 'eras-table-display-change-selection should have been fired once');
             done();
           });
         });
@@ -537,7 +537,7 @@
             assert.equal(0, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
             var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
             assert.equal(0, checked, 'expected only one to be selected, not ' + length);
-            assert(spy.calledOnce, 'selection-change should have been fired once');
+            assert(spy.calledOnce, 'eras-table-display-change-selection should have been fired once');
 
             done();
           });
@@ -552,7 +552,7 @@
             assert.equal(0, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
             var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
             assert.equal(0, checked, 'expected only one to be selected, not ' + length);
-            assert(spy.calledTwice, 'selection-change should have been fired twice');
+            assert(spy.calledTwice, 'eras-table-display-change-selection should have been fired twice');
             done();
           });
         });
@@ -566,7 +566,7 @@
             assert.equal(1, el.selectedIds.length, 'expected only one to be selected, not ' + el.selectedIds.length);
             var checked = el.$.body.querySelectorAll('paper-checkbox[checked]').length;
             assert.equal(1, checked, 'expected only one to be selected, not ' + length);
-            assert(spy.calledTwice, 'selection-change should have been fired twice');
+            assert(spy.calledTwice, 'eras-table-display-change-selection should have been fired twice');
             done();
           });
         });

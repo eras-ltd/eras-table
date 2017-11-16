@@ -662,7 +662,7 @@ Property|Description|Default
 			 * ensures the correct checkboxes are ticked. 
 			 * Listening to change events for single and multi select is turned off for 
 			 * the duration of this call.
-			 * Fires `selection-change` when finished.
+			 * Fires `eras-table-display-change-selection` when finished.
 			 * @param {Object} e `iron-change` event from multi select `paper-checkbox`
 			 */
 			_doMultiSelect: function (e) {
@@ -695,7 +695,7 @@ Property|Description|Default
 				this._listenForMultiSelect = true;
 
 				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
-				this.fire('selection-change', { selectedIds: this.selectedIds });
+				this.fire('eras-table-display-change-selection', { selectedIds: this.selectedIds });
 			},
 
 			/**
@@ -703,7 +703,7 @@ Property|Description|Default
 			 * check box is clicked, and ensures the correct checkboxes are ticked. 
 			 * Listening to change events for single and multi select is turned off for 
 			 * the duration of this call.
-			 * Fires `selection-change` when finished.
+			 * Fires `eras-table-display-change-selection` when finished.
 			 * @param {Object} e `iron-change` event from single select `paper-checkbox`
 			 */
 			_doSingleSelect: function (e) {
@@ -742,7 +742,7 @@ Property|Description|Default
 				this._listenForMultiSelect = true;
 
 				this._currentSelectionType = this._getCurrentSelectionType(this.selectedIds);
-				this.fire('selection-change', { selectedIds: this.selectedIds });
+				this.fire('eras-table-display-change-selection', { selectedIds: this.selectedIds });
 			},
 
 			/**
@@ -843,7 +843,7 @@ Property|Description|Default
 
 			/**
 			 * Fired when a rows are selected or deselected (multiselect only fires it once)
-			 * @event selection-change
+			 * @event eras-table-display-change-selection
 			 * @param {{selectedIds:String[]}} detail
 			 */
 
