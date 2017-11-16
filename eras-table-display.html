@@ -305,7 +305,8 @@ Property|Description|Default
 				},
 
 				/**
-				 * Array of objects describing how the data is sorted. Fires `eras-table-display-change-sort` when changed.
+				 * Array of objects describing how the data is sorted. Fires 
+				 * `eras-table-display-change-sort` when changed.
 				 * - property: The name of the property to sort by
 				 * - direction: The direction to sort in: `asc` | `desc`
 				 * @type {{ property:String, direction:String }[]}
@@ -317,7 +318,7 @@ Property|Description|Default
 				},
 
 				/**
-				 * Array of objects describing how the data is filtered. Fired `filter-change` when changed.
+				 * Array of objects describing how the data is filtered. Fired `eras-table-display-change-filter` when changed.
 				 * - property: the name of the property to sort by
 				 * - value: object containing value to filter on
 				 * @type {{ property:String, value:Object }[]}
@@ -821,11 +822,11 @@ Property|Description|Default
 			},
 
 			/**
-			 * Fires the `filter-change` event in response to `filter` being changed.
+			 * Fires the `eras-table-display-change-filter` event in response to `filter` being changed.
 			 */
 			_filterChanged: function (filters) {
 				this._refreshHeaderIcons();
-				this.fire('filter-change', { filters: filters });
+				this.fire('eras-table-display-change-filter', { filters: filters });
 			},
 
 			/**
@@ -854,7 +855,7 @@ Property|Description|Default
 
 			/**
 			 * Fired when the filter criteria are changed
-			 * @event filter-change
+			 * @event eras-table-display-change-filter
 			 * @param {{ filters: { property:String, value:Object }[] }} detail
 			 */
 		});
