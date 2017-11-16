@@ -593,7 +593,7 @@ Property|Description|Default
 			 * if needed.
 			 * @param {Object} e On tap event from `paper-dropdown-menu`
 			 */
-			_changePerPage: function (e) {			
+			_changePerPage: function (e) {
 				this.fire('eras-table-display-change-per-page', { size: parseInt(e.detail.item.dataset.value) });
 
 				if ((this.page.current - 1) * this.page.size + 1 > this.page.results)
