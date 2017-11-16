@@ -80,6 +80,14 @@
             results: self.page.results
           };
         });
+
+        this.$.display.addEventListener('eras-table-display-change-per-page', function(e){
+          self.page = {
+            current: self.page.current, 
+            size: e.detail.size, // update page size
+            results: self.page.results
+          };
+        });
       },
 
       /**

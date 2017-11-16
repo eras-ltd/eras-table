@@ -137,6 +137,21 @@
             done();
           });
         });
+
+        suite('per page', function () {
+          var dataTest = function (expected) {
+            return function (done) {
+              el.$.display.fire('eras-table-display-change-per-page', { size: expected });
+              assert.equal(expected, el._dataPage.length, 'expected `_dataPage` to have been updated with ' + expected + ' rows not ' + el._dataPage.length);
+              done();
+            };
+          };
+
+          var data = [5, 10, 25, 50];
+
+          for (var i = 0; i < data.length; i++)
+            test(data[i].toString(), dataTest(data[i]));
+        });
       });
     });
   </script>
