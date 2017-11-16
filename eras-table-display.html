@@ -587,11 +587,17 @@ Property|Description|Default
 
 			/**
 			 * Function to be called when a new page size is selected.
-			 * Fires a `eras-table-display-change-per-page` event with the requested page size.
+			 * Fires a `eras-table-display-change-per-page` event with the requested page size
+			 * then checks if the page is in range (not trying to show 101-200 of 50 results)
+			 * and fires a `eras-table-display-change-page` event targeting the last page
+			 * if needed.
 			 * @param {Object} e On tap event from `paper-dropdown-menu`
 			 */
 			_changePerPage: function (e) {			
-				this.fire('eras-table-display-change-per-page', { size: e.detail.item.dataset.value });
+				this.fire('eras-table-display-change-per-page', { size: parseInt(e.detail.item.dataset.value) });
+
+				if ((this.page.current - 1) * this.page.size + 1 > this.page.results)
+					this.fire('eras-table-display-change-page', { target: Math.ceil(this.page.results / this.page.size) });
 			},
 
 			/**
