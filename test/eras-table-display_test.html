@@ -275,7 +275,7 @@
                 menu.fire('iron-select', { item: item });
 
                 assert(fire.calledOnce, 'eras-table-display-change-per-page event should have fired once');
-                assert.deepEqual({ size: option.toString() }, fire.args[0][1],
+                assert.deepEqual({ size: option }, fire.args[0][1],
                   'expected the 2nd argument of the event to be `{ size: ' + option + ' }` not ' + JSON.stringify(fire.args[0][1]));
 
                 done();
