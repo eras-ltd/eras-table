@@ -491,8 +491,8 @@ Property|Description|Default
 			 * @return {{ from:Number, to:Number }}
 			 */
 			_computePagingInfo: function (page) {
-				var from = (this.page.current - 1) * this.page.size + 1;
-				var to = Math.min(from + this.page.size - 1, page.results);
+				var from = (page.current - 1) * page.size + 1;
+				var to = Math.min(from + page.size - 1, page.results);
 
 				return {
 					from: from,
