@@ -292,7 +292,7 @@
         var fire;
 
         setup(function () {
-          fire = sinon.spy(el, 'fire').withArgs('sort-change');
+          fire = sinon.spy(el, 'fire').withArgs('eras-table-display-change-sort');
         });
 
         teardown(function () {
@@ -303,7 +303,7 @@
           var sort = [{ property: 'prop-1', direction: 'asc' }];
           el.sort = sort;
 
-          assert(fire.calledOnce, 'expected `sort-change` to be fired once');
+          assert(fire.calledOnce, 'expected `eras-table-display-change-sort` to be fired once');
 
           assert.deepEqual({ sort: sort }, fire.args[0][1],
             'expected the 2nd argument of the event to be ' + JSON.stringify({ sort: sort }) + ' not ' + JSON.stringify(fire.args[0][1]));

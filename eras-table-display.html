@@ -305,7 +305,7 @@ Property|Description|Default
 				},
 
 				/**
-				 * Array of objects describing how the data is sorted. Fires `sort-change` when changed.
+				 * Array of objects describing how the data is sorted. Fires `eras-table-display-change-sort` when changed.
 				 * - property: The name of the property to sort by
 				 * - direction: The direction to sort in: `asc` | `desc`
 				 * @type {{ property:String, direction:String }[]}
@@ -813,11 +813,11 @@ Property|Description|Default
 			},
 
 			/**
-			 * Fires the `sort-change` event in response to `sort` being changed.
+			 * Fires the `eras-table-display-change-sort` event in response to `sort` being changed.
 			 */
 			_sortChanged: function (sort) {
 				this._refreshHeaderIcons();
-				this.fire('sort-change', { sort: sort });
+				this.fire('eras-table-display-change-sort', { sort: sort });
 			},
 
 			/**
@@ -848,7 +848,7 @@ Property|Description|Default
 
 			/**
 			 * Fired when the sort criteria are changed
-			 * @event sort-change
+			 * @event eras-table-display-change-sort
 			 * @param {{ sort: { property:String, direction:String }[] }} detail
 			 */
 
